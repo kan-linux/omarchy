@@ -10,8 +10,10 @@ if omarchy-cmd-present alacritty; then
   cp "$OMARCHY_PATH/default/alacritty/Alacritty.desktop" ~/.local/share/applications/
 fi
 
-if [[ -f "$OMARCHY_PATH/install/user/mise.sh" ]]; then
+if [[ -f "$OMARCHY_PATH/install/user/mise.sh" ]] && omarchy-cmd-present mise; then
   bash "$OMARCHY_PATH/install/user/mise.sh"
 fi
 
-update-desktop-database ~/.local/share/applications
+if omarchy-cmd-present update-desktop-database; then
+  update-desktop-database ~/.local/share/applications
+fi

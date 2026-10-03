@@ -21,6 +21,7 @@ cups
 cups-filters
 cups-pk-helper
 ddcutil
+desktop-file-utils
 docker
 docker-buildx
 docker-compose
