@@ -139,7 +139,7 @@
       "type": "command",
       "key": "󱦟 OS Age",
       "keyColor": "magenta",
-      "text": "echo $(( ($(date +%s) - $(stat -c %W /)) / 86400 )) days"
+      "text": "source /etc/os-release; build_ts=$(date -d $BUILD_ID +%s); echo $(( ($(date +%s) - build_ts) / 86400 )) days"
     },
     {
       "type": "uptime",
