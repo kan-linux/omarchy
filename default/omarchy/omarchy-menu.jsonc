@@ -33,8 +33,8 @@
   "system.suspend": {"icon":"󰒲","label":"Suspend","when":"! omarchy-toggle-enabled suspend-off","action":"systemctl suspend"},
   "system.hibernate": {"icon":"󰤁","label":"Hibernate","when":"omarchy-hibernation-available","action":"systemctl hibernate"},
   "system.logout": {"icon":"󰍃","label":"Logout","action":"omarchy-system-logout"},
-  "system.reboot": {"icon":"󰜉","label":"Reboot","action":"omarchy-system-reboot"},
-  "system.shutdown": {"icon":"󰐥","label":"Shutdown","action":"omarchy-system-shutdown"},
+  "system.reboot": {"icon":"󰜉","label":"Reboot","action":"reboot"},
+  "system.shutdown": {"icon":"󰐥","label":"Shutdown","action":"poweroff"},
 
   // Style
   "style.theme": {"icon":"󰸌","label":"Theme","aliases":["theme","themes"],"action":"omarchy-shell shell summon omarchy.image-picker '{\"source\":\"themes\"}'"},

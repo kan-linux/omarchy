@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Name=Firefox
-Exec=firefox %u
+Exec=/opt/firefox/firefox %u
 Icon=firefox
 Terminal=false
 StartupNotify=true

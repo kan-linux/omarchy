@@ -1,8 +1,12 @@
 avahi-discover
+Basecamp
 bssh
 bvnc
 cmake-gui
 cups
+Discord
+Disk Usage
+Docker
 dropbox
 electron34
 electron36
@@ -11,9 +15,15 @@ fcitx5-configtool
 fcitx5-wayland-launcher
 foot-server
 footclient
+Google Contacts
+Google Maps
+Google Messages
+Google Photos
 gvim
 hermes
+HEY
 hwmixvolume
+imv
 java-java-openjdk
 jconsole-java-openjdk
 jshell-java-openjdk
@@ -28,6 +38,7 @@ libreoffice-startcenter
 libreoffice-xsltfilter
 limine-snapper-restore
 lstopo
+mpv
 org.fcitx.Fcitx5
 org.fcitx.fcitx5-config-qt
 org.fcitx.fcitx5-migrator
@@ -36,5 +47,9 @@ org.fcitx.fcitx5-qt6-gui-wrapper
 qv4l2
 qvidcap
 uuctl
+WhatsApp
 xgps
 xgpsspeed
+X
+YouTube
+Zoom
