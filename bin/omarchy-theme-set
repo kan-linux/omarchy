@@ -9,6 +9,10 @@ if [[ -z $1 ]]; then
   exit 1
 fi
 
+# Ensure the shell is not inside a directory that will be removed during the
+# theme swap (overlayfs workarounds may delete or rename $CURRENT_THEME_PATH).
+cd /tmp
+
 CURRENT_THEME_PATH="$HOME/.local/state/omarchy/current/theme"
 CURRENT_THEME_NAME_PATH="$HOME/.local/state/omarchy/current/theme.name"
 NEXT_THEME_PATH="$HOME/.local/state/omarchy/current/next-theme"
@@ -389,9 +393,22 @@ fi
 # Generate dynamic configs
 omarchy-theme-set-templates
 
-# Swap next theme in as current
-rm -rf "$CURRENT_THEME_PATH"
-mv "$NEXT_THEME_PATH" "$CURRENT_THEME_PATH"
+# Swap next theme in as current.
+# On an overlayfs (squashfs + tmpfs), the theme directory may have entries on
+# the read-only lower layer. `rm -rf` fails with I/O errors, and even an empty
+# directory on the lower layer cannot be removed. Instead of deleting, clear the
+# directory contents and copy the new theme in place.
+if [[ -d $CURRENT_THEME_PATH ]]; then
+  if ! rm -rf "$CURRENT_THEME_PATH" 2>/dev/null; then
+    find "$CURRENT_THEME_PATH" -mindepth 1 -delete 2>/dev/null || true
+    cp -a "$NEXT_THEME_PATH"/. "$CURRENT_THEME_PATH"/ 2>/dev/null
+    rm -rf "$NEXT_THEME_PATH"
+  else
+    mv "$NEXT_THEME_PATH" "$CURRENT_THEME_PATH"
+  fi
+else
+  mv "$NEXT_THEME_PATH" "$CURRENT_THEME_PATH"
+fi
 
 # Store theme name for reference
 echo "$THEME_NAME" >"$CURRENT_THEME_NAME_PATH"
