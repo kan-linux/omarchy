@@ -13,6 +13,13 @@ fi
 # theme swap (overlayfs workarounds may delete or rename $CURRENT_THEME_PATH).
 cd /tmp
 
+{
+  echo "===== theme-set START $(date) ====="
+  echo "theme-set: arg=$1 cwd=$(pwd) uid=$(id -u)"
+  echo "theme-set: WAYLAND_DISPLAY=$WAYLAND_DISPLAY OMARCHY_PATH=$OMARCHY_PATH XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR"
+  echo "theme-set: HOME=$HOME PATH=$PATH"
+} >> /tmp/theme-debug.log 2>&1
+
 CURRENT_THEME_PATH="$HOME/.local/state/omarchy/current/theme"
 CURRENT_THEME_NAME_PATH="$HOME/.local/state/omarchy/current/theme.name"
 NEXT_THEME_PATH="$HOME/.local/state/omarchy/current/next-theme"
@@ -51,7 +58,9 @@ run_parallel() {
 }
 
 shell_ipc() {
-  timeout 2 omarchy-shell "$@" >/dev/null 2>&1
+  echo "theme-set: shell_ipc $*" >> /tmp/theme-debug.log 2>&1
+  timeout 2 omarchy-shell "$@" >> /tmp/theme-debug.log 2>&1
+  echo "theme-set: shell_ipc exit=$?" >> /tmp/theme-debug.log 2>&1
 }
 
 is_video_path() {
@@ -391,32 +400,46 @@ if [[ $THEME_HEADLESS != "1" && $OMARCHY_THEME_SKIP_BACKGROUND != "1" ]]; then
 fi
 
 # Generate dynamic configs
+echo "theme-set: generating templates" >> /tmp/theme-debug.log 2>&1
 omarchy-theme-set-templates
+echo "theme-set: templates done" >> /tmp/theme-debug.log 2>&1
 
 # Swap next theme in as current.
-# On an overlayfs (squashfs + tmpfs), the theme directory may have entries on
-# the read-only lower layer. `rm -rf` fails with I/O errors, and even an empty
-# directory on the lower layer cannot be removed. Instead of deleting, clear the
-# directory contents and copy the new theme in place.
+echo "theme-set: swapping theme dir, CURRENT=$CURRENT_THEME_PATH NEXT=$NEXT_THEME_PATH" >> /tmp/theme-debug.log 2>&1
 if [[ -d $CURRENT_THEME_PATH ]]; then
   if ! rm -rf "$CURRENT_THEME_PATH" 2>/dev/null; then
+    echo "theme-set: rm -rf failed, using overlayfs workaround" >> /tmp/theme-debug.log 2>&1
+    # Force overlayfs copy-up: touch every file and directory so they move to
+    # the writable upper layer. Without this, find -delete only removes upper
+    # layer entries and lower layer files (old theme backgrounds) remain visible.
+    find "$CURRENT_THEME_PATH" -depth -exec touch -am {} + 2>/dev/null || true
     find "$CURRENT_THEME_PATH" -mindepth 1 -delete 2>/dev/null || true
     cp -a "$NEXT_THEME_PATH"/. "$CURRENT_THEME_PATH"/ 2>/dev/null
     rm -rf "$NEXT_THEME_PATH"
+    echo "theme-set: workaround done, backgrounds:" >> /tmp/theme-debug.log 2>&1
+    ls "$CURRENT_THEME_PATH/backgrounds" >> /tmp/theme-debug.log 2>&1
   else
+    echo "theme-set: rm -rf succeeded, mv" >> /tmp/theme-debug.log 2>&1
     mv "$NEXT_THEME_PATH" "$CURRENT_THEME_PATH"
   fi
 else
+  echo "theme-set: no current theme, mv" >> /tmp/theme-debug.log 2>&1
   mv "$NEXT_THEME_PATH" "$CURRENT_THEME_PATH"
 fi
+
+# Invalidate the image selector cache: the theme swap may have left a mix of
+# old lower-layer and new upper-layer entries in the backgrounds directory, and
+# the cached rows may be stale or empty.
+rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/omarchy/image-selector" 2>/dev/null || true
+echo "theme-set: cleared image-selector cache" >> /tmp/theme-debug.log 2>&1
 
 # Store theme name for reference
 echo "$THEME_NAME" >"$CURRENT_THEME_NAME_PATH"
 
 # Make the running shell pick up the new palette immediately while the rest of
 # the theme hooks run.
-colors_payload=$([[ -f $CURRENT_THEME_PATH/colors.toml ]] && base64 -w 0 "$CURRENT_THEME_PATH/colors.toml")
-shell_payload=$([[ -f $CURRENT_THEME_PATH/shell.toml ]] && base64 -w 0 "$CURRENT_THEME_PATH/shell.toml")
+colors_payload=$([[ -f $CURRENT_THEME_PATH/colors.toml ]] && base64 -w 0 "$CURRENT_THEME_PATH/colors.toml" 2>/dev/null || base64 "$CURRENT_THEME_PATH/colors.toml" | tr -d '\n')
+shell_payload=$([[ -f $CURRENT_THEME_PATH/shell.toml ]] && base64 -w 0 "$CURRENT_THEME_PATH/shell.toml" 2>/dev/null || base64 "$CURRENT_THEME_PATH/shell.toml" | tr -d '\n')
 if [[ $THEME_HEADLESS == "1" ]]; then
   # No shell/session bus exists during ISO chroot finalization, but the first
   # real login still needs a current background symlink for omarchy-shell to
@@ -466,3 +489,5 @@ if [[ $THEME_HEADLESS != "1" ]]; then
   # rows in the shell and refreshes them each time it opens.
   omarchy-theme-bg-cache >/dev/null 2>&1 &
 fi
+
+echo "===== theme-set DONE $(date) =====" >> /tmp/theme-debug.log 2>&1

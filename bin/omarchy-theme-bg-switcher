@@ -5,10 +5,24 @@
 # omarchy:name=bg-switcher
 # omarchy:aliases=omarchy background
 
+# Ensure a valid working directory: a prior omarchy-theme-set may have left the
+# shell's cwd inside a directory that was deleted by the overlayfs workaround.
+cd /tmp 2>/dev/null
+
+# Debug logging (remove after fixing)
+{
+  echo "bg-switcher: started at $(date), cwd=$(pwd), uid=$(id -u)"
+  echo "bg-switcher: WAYLAND_DISPLAY=$WAYLAND_DISPLAY OMARCHY_PATH=$OMARCHY_PATH"
+} >> /tmp/theme-debug.log 2>&1
+
 theme_name=$(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null)
 current_background=$(readlink -f "$HOME/.local/state/omarchy/current/background" 2>/dev/null)
+
+echo "bg-switcher: theme=$theme_name current=$current_background" >> /tmp/theme-debug.log 2>&1
 
 omarchy-menu-images \
   --selected "$current_background" \
   "$HOME/.local/state/omarchy/current/theme/backgrounds" \
   "$HOME/.config/omarchy/backgrounds/$theme_name"
+
+echo "bg-switcher: omarchy-menu-images exited with $?" >> /tmp/theme-debug.log 2>&1

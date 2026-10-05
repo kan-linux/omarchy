@@ -3,6 +3,9 @@
 # omarchy:summary=Open a generic image selector menu
 # omarchy:args=[--selected <image>] [--print-name] [--show-labels] [--filterable] [--lazy-thumbnails] [--preload] [--cache-only] [--print-rows] <image-dir>...
 
+# Ensure a valid working directory (overlayfs theme swap may have deleted cwd).
+cd /tmp 2>/dev/null
+
 selected_image=""
 print_name=false
 show_labels=false
@@ -343,12 +346,26 @@ fi
 # Image rows can contain newlines and tabs, which don't survive positional
 # shell IPC arguments. Base64-encode for transit; the ImagePicker plugin
 # Qt.atob()s on the other side.
-rows_b64=$(printf '%s' "$rows" | base64 -w 0)
+# busybox base64 may not support -w 0; strip newlines with tr as fallback.
+rows_b64=$(printf '%s' "$rows" | base64 -w 0 2>/dev/null || printf '%s' "$rows" | base64 | tr -d '\n')
 
 if [[ $preload == true ]]; then
   omarchy-shell image-selector preload "$rows_b64" "$selected_list_image" "$show_labels" "$filterable" >/dev/null || true
   exit 0
 fi
+
+# Debug logging (remove after fixing)
+{
+  echo "menu-images: started at $(date), cwd=$(pwd)"
+  echo "menu-images: image_dirs=${image_dirs[*]}"
+  for _dbg_dir in "${image_dirs[@]}"; do
+    echo "menu-images: dir=$_dbg_dir exists=$(test -d "$_dbg_dir" && echo Y || echo N)"
+    [[ -d $_dbg_dir ]] && echo "menu-images:   files=$(find -L "$_dbg_dir" -maxdepth 1 -type f \( -iname '*.webp' -o -iname '*.jpg' -o -iname '*.png' \) 2>/dev/null | wc -l)"
+  done
+  echo "menu-images: rows=$(echo "$rows" | wc -l), rows_len=${#rows}, selected=$selected_list_image"
+  echo "menu-images: rows_b64 length=${#rows_b64}"
+  echo "menu-images: cache_hit=$rows_cache_hit cache_file=$rows_cache_file"
+} >> /tmp/theme-debug.log 2>&1
 
 if ! open_result=$(omarchy-shell image-selector open \
      "" \
@@ -359,17 +376,25 @@ if ! open_result=$(omarchy-shell image-selector open \
      "$show_labels" \
      "$filterable"); then
   echo "Image selector failed to accept request" >&2
+  echo "menu-images: IPC FAILED" >> /tmp/theme-debug.log 2>&1
   exit 1
 fi
 
+echo "menu-images: IPC result=$open_result" >> /tmp/theme-debug.log 2>&1
+
 if [[ $open_result != "ok" ]]; then
   echo "Image selector failed to accept request" >&2
+  echo "menu-images: result not ok" >> /tmp/theme-debug.log 2>&1
   exit 1
 fi
+
+echo "menu-images: waiting for done_file=$done_file" >> /tmp/theme-debug.log 2>&1
 
 while [[ ! -e $done_file ]]; do
   sleep 0.01
 done
+
+echo "menu-images: done_file appeared" >> /tmp/theme-debug.log 2>&1
 
 if [[ -s $selection_file ]]; then
   if [[ $print_name == true ]]; then
