@@ -10,7 +10,7 @@ set -euo pipefail
 PLUGIN_ICON=$'\U000f0431'
 
 case "${1:-}" in
-  enable) filter='(.enabled | not)' ;;
+  enable) filter='(.enabled | not) and (.id == "omarchy.active-window")' ;;
   disable) filter='.canDisable and .enabled' ;;
   clone) filter='.firstParty and (.id as $id | ($plugins | map(.clonedFrom // "") | index($id)) == null)' ;;
   remove) filter='(.firstParty | not)' ;;

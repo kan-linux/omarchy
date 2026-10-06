@@ -71,7 +71,7 @@
       "type": "command",
       "key": "\ue900 OS",
       "keyColor": "blue",
-      "text": "version=$(omarchy-version) && echo \"Omarchy $version\""
+      "text": "grep -m1 -v '^$' /etc/issue"
     },
     {
       "type": "command",
@@ -83,7 +83,7 @@
       "type": "command",
       "key": "│ ├󰔫",
       "keyColor": "blue",
-      "text": "channel=$(omarchy-version-channel); echo \"$channel\""
+      "text": "echo \"kanlinux\""
     },
     {
       "type": "kernel",
