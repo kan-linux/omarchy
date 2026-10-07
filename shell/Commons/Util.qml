@@ -55,7 +55,12 @@ QtObject {
   }
 
   function execDetached(command) {
-    Quickshell.execDetached(["bash", "-lc", command])
+    // kanlinux debug: capture menu actions + exit codes to /tmp/system.log
+    // (diagnose System menu reboot/shutdown). /tmp is tmpfs — lost on reboot.
+    var cmd = String(command || "")
+    Quickshell.execDetached(["bash", "-lc",
+      'echo "[$(date "+%F %T")] CMD: $1" >> /tmp/system.log; eval "$1" >> /tmp/system.log 2>&1; echo "[$(date "+%F %T")] EXIT=$?" >> /tmp/system.log',
+      "omarchy-exec", cmd])
   }
 
   // Run an argv vector without a shell interpreting it: the constant `exec "$@"`
