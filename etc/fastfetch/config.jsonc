@@ -39,9 +39,10 @@
       "keyColor": "green"
     },
     {
-      "type": "display",
+      "type": "command",
       "key": "│ ├󱄄",
-      "keyColor": "green"
+      "keyColor": "green",
+      "text": "for f in /sys/class/drm/card*/status; do [ \"$(cat \"$f\")\" = \"connected\" ] && head -1 \"${f%/status}/modes\" && break; done"
     },
     {
       "type": "disk",
