@@ -4,10 +4,32 @@
 # omarchy:examples=omarchy logout | omarchy system logout
 # omarchy:aliases=omarchy logout
 
-nohup bash -c "sleep 2 && uwsm stop" >/dev/null 2>&1 &
+# kan-linux: no uwsm. Ending the shell ends the greetd session; greetd then
+# restarts gtkgreet. start-omarchy-session waits on quickshell, restores the
+# greeter-minimal Hyprland config, and exits so greetd brings the greeter back.
 
 omarchy-osd -i logout -m "Logging out" -d 5000
 
 # Now close all windows
 omarchy-hyprland-window-close-all
 sleep 1 # Allow apps like Chrome to shutdown correctly
+
+# Stop the shell cleanly so omarchy-launch-shell sees status 0 and exits
+# without relaunching (same path as omarchy-restart-shell).
+config_dir="${OMARCHY_PATH:-/usr/share/omarchy}/shell"
+while timeout 5 quickshell kill -p "$config_dir" --any-display >/dev/null 2>&1; do :; done
+
+# Fallback: shell launched directly (no supervisor) or quickshell kill failed.
+pkill -TERM -x quickshell 2>/dev/null
+pkill -TERM -f omarchy-launch-shell 2>/dev/null
+
+# Session helpers started by start-omarchy-session via hyprctl — they outlive
+# the session because Hyprland stays up across logouts.
+for helper in omarchy-provision-first-run omarchy-powerprofiles-init \
+              omarchy-hyprland-monitor-watch udiskie; do
+  pkill -TERM -x "$helper" 2>/dev/null
+done
+
+# Audio stack is started per-login by start-omarchy-session; stop it so the
+# next login gets a clean pipewire/wireplumber.
+timeout 3 systemctl --user stop pipewire.service pipewire-pulse.service wireplumber.service 2>/dev/null
