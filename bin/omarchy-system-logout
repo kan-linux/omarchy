@@ -30,6 +30,12 @@ for helper in omarchy-provision-first-run omarchy-powerprofiles-init \
   pkill -TERM -x "$helper" 2>/dev/null
 done
 
+# ext-session-lock outlives its client: killing the shell while a lock is held
+# (or raced with unlock) leaves Hyprland m_locked stuck true — a crashed
+# lockscreen that blocks the greeter and the next session's desktop. Client is
+# dead now, so clear_crashed_lockscreen only clears that orphan.
+hyprctl eval 'hl.clear_crashed_lockscreen()' >/dev/null 2>&1 || true
+
 # Audio stack is started per-login by start-omarchy-session; stop it so the
 # next login gets a clean pipewire/wireplumber.
 timeout 3 systemctl --user stop pipewire.service pipewire-pulse.service wireplumber.service 2>/dev/null
