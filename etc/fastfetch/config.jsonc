@@ -72,7 +72,7 @@
       "type": "command",
       "key": "\ue900 OS",
       "keyColor": "blue",
-      "text": "grep -m1 -v '^$' /etc/issue"
+      "text": ". /etc/os-release && echo \"$PRETTY_NAME\""
     },
     {
       "type": "command",
