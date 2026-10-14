@@ -169,7 +169,9 @@ BarWidget {
     var result = []
     for (var i = 0; i < values.length; i++) {
       var item = values[i]
-      if (item.status === Status.Passive) continue
+      // Pinned items stay visible even in Passive status (e.g. fcitx5
+      // switches to Passive when English mode is active).
+      if (item.status === Status.Passive && pinnedIds.indexOf(String(item.id || "")) === -1) continue
       if (ownedByOmarchy(item)) continue
       if (category === "all") {
         result.push(item)
@@ -800,7 +802,9 @@ BarWidget {
 
     required property var modelData
 
-    visible: modelData.status !== Status.Passive
+    // Pinned items stay visible even in Passive status (e.g. fcitx5
+    // switches to Passive when English mode is active).
+    visible: modelData.status !== Status.Passive || root.pinnedIds.indexOf(String(modelData.id || "")) !== -1
     implicitWidth: visible ? root.trayItemExtent : 0
     implicitHeight: visible ? root.trayItemExtent : 0
 

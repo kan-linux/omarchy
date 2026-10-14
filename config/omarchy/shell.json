@@ -42,7 +42,10 @@
       ],
       "right": [
         {
-          "id": "omarchy.tray"
+          "id": "omarchy.tray",
+          "pinned": [
+            "Fcitx"
+          ]
         },
         {
           "id": "omarchy.agents"
