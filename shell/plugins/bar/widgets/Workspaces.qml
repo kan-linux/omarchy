@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
 import Quickshell.Hyprland
 import qs.Commons
 import qs.Ui
@@ -30,6 +32,32 @@ BarWidget {
     return ids
   }
 
+  // Hyprland socket2 事件流在 runtime dir 被 remount 时会断；
+  // 轮询 activeworkspace 作为兜底，保证点击后焦点能跟着走。
+  property int polledFocusedId: 1
+  property string pollBuf: ""
+  Timer {
+    interval: 400
+    repeat: true
+    running: true
+    triggeredOnStart: true
+    onTriggered: wsPoll.running = true
+  }
+  Process {
+    id: wsPoll
+    command: ["hyprctl", "-j", "activeworkspace"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        try {
+          var obj = JSON.parse(text || "{}")
+          if (obj && obj.id)
+            root.polledFocusedId = obj.id
+        } catch (e) {}
+      }
+    }
+  }
+
   function focusWorkspace(id) {
     if (!root.bar) return
     root.bar.run("hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ workspace = \"" + id + "\" })"))
@@ -56,7 +84,7 @@ BarWidget {
 
         readonly property var workspace: root.workspaceById(modelData)
         readonly property bool occupied: workspace !== null && workspace.toplevels.values.length > 0
-        readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === modelData
+        readonly property bool focused: root.polledFocusedId === modelData
 
         bar: root.bar
         text: focused ? "\uDB85\uDCFB" : (modelData === 10 ? "0" : String(modelData))
