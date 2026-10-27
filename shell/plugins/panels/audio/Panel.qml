@@ -20,11 +20,13 @@ Panel {
   readonly property var mediaService: bar?.shell?.firstPartyServiceFor("omarchy.media")
   readonly property var activeMediaPlayer: mediaService ? mediaService.activePlayer : null
 
+  // 只收真实设备：HDA split / alsa:pcm 会冒出 (null)、裸 ALSA Sink 等
+  // 幽灵节点，点开音量面板时会当成「声卡」列出来，属于噪音。
   readonly property var candidateSinks: {
     var list = []
     for (var i = 0; i < nodes.length; i++) {
       var n = nodes[i]
-      if (n && n.isSink && !n.isStream) list.push(n)
+      if (n && n.isSink && !n.isStream && isRealDevice(n)) list.push(n)
     }
     return list
   }
@@ -33,7 +35,7 @@ Panel {
     var list = []
     for (var i = 0; i < nodes.length; i++) {
       var n = nodes[i]
-      if (n && !n.isSink && !n.isStream && isAudioSource(n)) {
+      if (n && !n.isSink && !n.isStream && isAudioSource(n) && isRealDevice(n)) {
         var name = n.name || ""
         if (name === "quickshell") continue
         list.push(n)
@@ -71,6 +73,10 @@ Panel {
 
   function isAudioSource(node) {
     return Model.isAudioSource(node)
+  }
+
+  function isRealDevice(node) {
+    return Model.isRealDevice(node)
   }
 
   property var cachedAudioSinks: []

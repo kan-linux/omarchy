@@ -8,6 +8,31 @@ function isPlaybackStream(node) {
     || mediaClass.indexOf("Output") !== -1
 }
 
+// 用户可选的真实输出/输入设备。排除 PipeWire 在 HDA split / alsa:pcm 下
+// 产生的 (null)、裸 ALSA Sink 等幽灵节点——它们会以「声卡」出现在面板里，
+// 但不是用户能选的设备。
+function isRealDevice(node) {
+  if (!node) return false
+  var name = String(node.name || "").trim()
+  if (!name || name === "null" || name === "undefined") return false
+  // 裸 ALSA 设备（api.alsa.pcm 而非 acp profile）名不带输出后缀
+  if (name === "ALSA Sink" || name === "ALSA Source") return false
+  var p = nodeProps(node)
+  var desc = String(p["device.description"] || node.description || "").trim()
+  if (!desc || desc === "null" || desc === "(null)") return false
+  // 监视源不是声卡
+  if (name.indexOf(".monitor") !== -1) return false
+  // 有正常设备名的才进列表
+  return name.indexOf("alsa_output.") === 0
+    || name.indexOf("alsa_input.") === 0
+    || name.indexOf("bluez_output.") === 0
+    || name.indexOf("bluez_input.") === 0
+    || name.indexOf("easyeffects") === 0
+    || name.indexOf("omarchy_speaker_tuning") === 0
+    || name.indexOf("oss_output.") === 0
+    || name.indexOf("oss_input.") === 0
+}
+
 function isAudioSource(node) {
   if (!node) return false
   if (node.audio) return true
@@ -237,6 +262,7 @@ if (typeof module !== "undefined") {
   module.exports = {
     isPlaybackStream: isPlaybackStream,
     isAudioSource: isAudioSource,
+    isRealDevice: isRealDevice,
     listSnapshot: listSnapshot,
     outputVolumeName: outputVolumeName,
     parseSinkAvailability: parseSinkAvailability,
