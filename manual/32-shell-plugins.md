@@ -20,7 +20,7 @@ Plugin ids are namespaced. The built-ins all start with `omarchy.` — `omarchy.
 
 ```
 omarchy plugin enable omarchy.tailscale
-omarchy plugin disable omarchy.weather
+omarchy plugin disable omarchy.system-update
 ```
 
 Or use the menu: _Setup > Plugins_ has Enable, Disable, Add, Clone, and Remove, each with a picker that only offers the plugins that make sense for that action.

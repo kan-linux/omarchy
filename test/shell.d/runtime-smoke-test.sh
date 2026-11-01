@@ -490,7 +490,6 @@ visible_default_ids='[
   "omarchy.menu",
   "omarchy.workspaces",
   "omarchy.clock",
-  "omarchy.weather",
   "omarchy.system-update",
   "omarchy.network",
   "omarchy.audio",
@@ -528,10 +527,8 @@ pass "default bar layout renders expected module slots"
 
 jq -e '
   map(select(.section == "center")) | map(.id) as $center |
-  ($center | index("omarchy.weather")) != null and
   ($center | index("omarchy.system-update")) != null and
   ($center | index("omarchy.indicators")) != null and
-  (($center | index("omarchy.weather")) < ($center | index("omarchy.system-update"))) and
   (($center | index("omarchy.system-update")) < ($center | index("omarchy.indicators")))
 ' <<<"$geometry" >/dev/null || {
   printf 'Geometry:\n' >&2

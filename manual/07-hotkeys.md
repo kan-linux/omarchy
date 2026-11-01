@@ -209,7 +209,6 @@ All style options are also accessible under _Style_ in the Omarchy menu (`Super 
 | ----------------------- | --------------------- |
 | `Super + Ctrl + Alt + T` | Show time as notification  |
 | `Super + Ctrl + Alt + B` | Show battery as notification  |
-| `Super + Ctrl + Alt + W` | Toggle weather as notification  |
 
 ## Tmux
 

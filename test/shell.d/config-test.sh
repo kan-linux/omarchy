@@ -21,11 +21,11 @@ pass "default shell.json has versioned bar layout"
 jq -e '
   def ids: map(.id // .);
   (.bar.layout.center | ids) as $ids |
-  ($ids | index("omarchy.weather")) as $weather |
+  ($ids | index("omarchy.keyboard-layout")) as $layout |
   ($ids | index("omarchy.system-update")) as $update |
-  $weather != null and $update == $weather + 1
+  $layout != null and $update == $layout + 1
 ' "$ROOT/config/omarchy/shell.json" >/dev/null
-pass "default center layout keeps update next to weather"
+pass "default center layout keeps update next to the keyboard layout"
 
 jq -e '
   (.bar.centerAnchor // "") as $anchor |

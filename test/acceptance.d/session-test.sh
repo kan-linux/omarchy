@@ -18,7 +18,7 @@ for plugin in \
   omarchy.audio omarchy.background omarchy.bar omarchy.bluetooth \
   omarchy.clipboard omarchy.emojis omarchy.menu \
   omarchy.monitor omarchy.network omarchy.notifications omarchy.power \
-  omarchy.reminders omarchy.weather; do
+  omarchy.reminders; do
   [[ $plugins == *"$plugin"* ]] || fail "shell plugin is loaded: $plugin" "loaded plugins: $plugins"
   pass "shell plugin is loaded: $plugin"
 done

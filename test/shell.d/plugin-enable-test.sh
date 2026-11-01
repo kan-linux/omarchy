@@ -29,8 +29,8 @@ grep -Fqx 'shell enablePlugin omarchy.active-window {"section":"right"}' "$calls
   fail "plugin enable did not combine activation and placement"
 pass "plugin enable combines activation and placement in one shell mutation"
 
-run_enable omarchy.clock --before omarchy.weather >/dev/null
-grep -Fqx 'shell enablePlugin omarchy.clock {"before":"omarchy.weather"}' "$calls" ||
+run_enable omarchy.clock --before omarchy.elsewhen >/dev/null
+grep -Fqx 'shell enablePlugin omarchy.clock {"before":"omarchy.elsewhen"}' "$calls" ||
   fail "plugin enable did not preserve relative placement"
 pass "plugin enable forwards relative placement"
 

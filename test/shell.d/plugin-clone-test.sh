@@ -151,11 +151,11 @@ grep -qx 'omarchy-plugin-enable tester.background' "$CALLS" ||
   fail "clone does not enable an ordinary cloned plugin"
 pass "clone switches ordinary plugins"
 
-EDITOR=fake-editor clone_plugin omarchy.weather --edit >/dev/null
-grep -qx "fake-editor $TMPDIR/home/.config/omarchy/plugins/tester.weather" "$CALLS" ||
+EDITOR=fake-editor clone_plugin omarchy.indicators --edit >/dev/null
+grep -qx "fake-editor $TMPDIR/home/.config/omarchy/plugins/tester.indicators" "$CALLS" ||
   fail "clone --edit does not open the clone in EDITOR"
 pass "clone --edit opens the clone in EDITOR"
-rm -rf "$TMPDIR/home/.config/omarchy/plugins/tester.weather"
+rm -rf "$TMPDIR/home/.config/omarchy/plugins/tester.indicators"
 
 mkdir -p "$TMPDIR/home/.config/omarchy/plugins/acme.example"
 cat >"$TMPDIR/home/.config/omarchy/plugins/acme.example/manifest.json" <<'JSON'
@@ -166,17 +166,17 @@ if clone_plugin acme.example >/dev/null 2>&1; then
 fi
 pass "clone is limited to built-in plugins"
 
-if clone_plugin omarchy.weather custom.weather >/dev/null 2>&1; then
+if clone_plugin omarchy.indicators custom.indicators >/dev/null 2>&1; then
   fail "clone accepts a custom id"
 fi
-[[ ! -e $TMPDIR/home/.config/omarchy/plugins/tester.weather ]] ||
+[[ ! -e $TMPDIR/home/.config/omarchy/plugins/tester.indicators ]] ||
   fail "rejected custom id leaves a clone behind"
 pass "clone derives the personal id from the username"
 
-if clone_plugin omarchy.weather --replace >/dev/null 2>&1; then
+if clone_plugin omarchy.indicators --replace >/dev/null 2>&1; then
   fail "clone still accepts bar layout actions"
 fi
-[[ ! -e $TMPDIR/home/.config/omarchy/plugins/tester.weather ]] ||
+[[ ! -e $TMPDIR/home/.config/omarchy/plugins/tester.indicators ]] ||
   fail "rejected bar action leaves a clone behind"
 pass "clone does not accept manual switch options"
 

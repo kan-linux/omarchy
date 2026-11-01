@@ -4,37 +4,13 @@ set -euo pipefail
 
 source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/base-test.sh"
 
-WEATHER_FILE="$HOME/.local/state/omarchy/settings/weather.json"
-weather_backup=$(mktemp)
-weather_existed=0
-
-if [[ -f $WEATHER_FILE ]]; then
-  cp "$WEATHER_FILE" "$weather_backup"
-  weather_existed=1
-fi
-
 hide_panels() {
   local plugin
 
-  for plugin in omarchy.weather omarchy.bluetooth omarchy.network omarchy.audio omarchy.monitor omarchy.power; do
+  for plugin in omarchy.bluetooth omarchy.network omarchy.audio omarchy.monitor omarchy.power; do
     omarchy-shell shell hide "$plugin" >/dev/null 2>&1 || true
   done
 }
-
-restore_weather() {
-  hide_panels
-
-  if ((weather_existed)); then
-    mkdir -p "$(dirname "$WEATHER_FILE")"
-    cp "$weather_backup" "$WEATHER_FILE"
-  else
-    rm -f "$WEATHER_FILE"
-  fi
-
-  rm -f "$weather_backup"
-}
-
-trap restore_weather EXIT
 
 open_and_capture_panel() {
   local name="$1" plugin="$2"
@@ -47,17 +23,6 @@ open_and_capture_panel() {
   omarchy-shell shell hide "$plugin" >/dev/null
   wait_until "$name panel closes" 15 layer_absent "omarchy-keyboard-panel"
 }
-
-# Give weather deterministic coordinates so this test exercises the real
-# Open-Meteo forecast instead of IP geolocation through wttr.in.
-omarchy-weather-location --set "San Francisco" "37.7749,-122.4194"
-omarchy-shell shell summon omarchy.weather >/dev/null
-wait_until "weather panel opens" 15 layer_present "omarchy-keyboard-panel"
-wait_until "weather location is visible" 30 screen_contains "SAN FRANCISCO"
-wait_until "weather details are visible" 30 screen_contains "WIND"
-screenshot "success-panel-weather"
-omarchy-shell shell hide omarchy.weather >/dev/null
-wait_until "weather panel closes" 15 layer_absent "omarchy-keyboard-panel"
 
 status=0
 panels='bluetooth|omarchy.bluetooth
