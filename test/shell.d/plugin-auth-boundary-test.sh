@@ -141,7 +141,7 @@ qml_matches "$shell_qml" 'shell\.pluginCloneMaySummon\( *currentManifest\( *\), 
   fail "built-in clones cannot summon their existing auxiliary UI"
 qml_matches "$shell_qml" '"omarchy\.media": *\["omarchy\.osd"\]' ||
   fail "media clones cannot summon their existing OSD target"
-qml_matches "$shell_qml" '"omarchy\.network": *\["omarchy\.speedtest", *"omarchy\.wifiqr"\]' ||
+qml_matches "$shell_qml" '"omarchy\.network": *\["omarchy\.wifiqr"\]' ||
   fail "network clones cannot summon their existing auxiliary panels"
 pass "built-in service and widget clones retain narrow configuration and UI integration"
 

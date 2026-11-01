@@ -373,7 +373,7 @@ ShellRoot {
       "omarchy.audio": ["omarchy.osd"],
       "omarchy.media": ["omarchy.osd"],
       "omarchy.monitor": ["omarchy.osd"],
-      "omarchy.network": ["omarchy.speedtest", "omarchy.wifiqr"]
+      "omarchy.network": ["omarchy.wifiqr"]
     }
     var targets = allowed[sourceId] || []
     return targets.indexOf(String(requestedId || "")) !== -1

@@ -11,8 +11,8 @@ const menuQml = fs.readFileSync(path.join(root, 'shell/plugins/menu/Menu.qml'), 
 const defaultMenuJsonc = fs.readFileSync(path.join(root, 'default/omarchy/omarchy-menu.jsonc'), 'utf8')
 
 assertDeepEqual(
-  menu.summonAction("omarchy-shell shell summon omarchy.speedtest"),
-  { id: 'omarchy.speedtest', payload: '{}' },
+  menu.summonAction("omarchy-shell shell summon omarchy.wifiqr"),
+  { id: 'omarchy.wifiqr', payload: '{}' },
   'menu runs a bare summon action in-process'
 )
 assertDeepEqual(
@@ -20,7 +20,7 @@ assertDeepEqual(
   { id: 'omarchy.image-picker', payload: '{"source":"themes"}' },
   'menu keeps a single-quoted summon payload'
 )
-assertEqual(menu.summonAction("omarchy-shell shell summon omarchy.speedtest && echo done"), null, 'menu leaves compound summon commands to bash')
+assertEqual(menu.summonAction("omarchy-shell shell summon omarchy.wifiqr && echo done"), null, 'menu leaves compound summon commands to bash')
 assertEqual(menu.summonAction(`omarchy-shell shell summon omarchy.x "$(id)"`), null, 'menu leaves shell-expanded payloads to bash')
 assertEqual(menu.summonAction("omarchy-theme-set nord"), null, 'menu leaves ordinary actions to bash')
 assert(

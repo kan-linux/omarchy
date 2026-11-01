@@ -131,11 +131,9 @@ Panel {
   // "off" beside a perfectly live Ethernet connection.
   readonly property bool canToggleWifi: networkManagerAvailable && wifiStationAvailable
   readonly property int qrHeaderIndex: canShareWifi ? 0 : -1
-  readonly property int speedHeaderIndex: canRunSpeedTest ? (canShareWifi ? 1 : 0) : -1
-  readonly property int toggleHeaderIndex: canToggleWifi ? (canShareWifi ? 1 : 0) + (canRunSpeedTest ? 1 : 0) : -1
-  readonly property int headerActionCount: (canShareWifi ? 1 : 0) + (canRunSpeedTest ? 1 : 0) + (canToggleWifi ? 1 : 0)
+  readonly property int toggleHeaderIndex: canToggleWifi ? (canShareWifi ? 1 : 0) : -1
+  readonly property int headerActionCount: (canShareWifi ? 1 : 0) + (canToggleWifi ? 1 : 0)
   readonly property bool qrHeaderHasCursor: cursorActive && focusSection === "header" && headerIndex === qrHeaderIndex
-  readonly property bool speedHeaderHasCursor: cursorActive && focusSection === "header" && headerIndex === speedHeaderIndex
   readonly property bool toggleHeaderHasCursor: cursorActive && focusSection === "header" && headerIndex === toggleHeaderIndex
   readonly property string toggleHint: Networking.wifiEnabled ? "Turn Wi-Fi off" : "Turn Wi-Fi on"
   readonly property var dnsProviders: ["DHCP", "Cloudflare", "Google", "Custom"]
@@ -161,9 +159,6 @@ Panel {
   readonly property bool bandPillsVisible: canSelectBand && bandPinned
   readonly property string bandSectionTitle: Model.bandSectionTitle(bandEffective, bandCurrent)
   readonly property bool bandBusy: pendingBand !== ""
-  // The speed test needs an interface to test, so its hero action only
-  // appears once there is one.
-  readonly property bool canRunSpeedTest: !!info.iface
   property int bandIndex: 0
   // The band section has up to two cursor rows: the Automatic switch on the
   // header line, then the pills. Same shape as wifiActionFocused.
@@ -217,16 +212,14 @@ Panel {
     function toggle() { root.toggle() }
     function toggleNetwork() { root.toggleNetwork() }
     // Compat routes for configs that summon the centered cards through the
-    // network target; both cards are their own plugins now.
+    // network target; the card is its own plugin now.
     function showQr() { root.summonWifiQr(true) }
-    function speedTest() { root.summonSpeedTest() }
     function openCaptivePortal() { root.openCaptivePortal() }
     function checkConnectivity() { root.checkConnectivity() }
   }
 
   function activateHeader() {
     if (headerIndex === qrHeaderIndex) summonWifiQr()
-    else if (headerIndex === speedHeaderIndex) summonSpeedTest()
     else if (headerIndex === toggleHeaderIndex) toggleNetwork()
   }
 
@@ -698,19 +691,6 @@ Panel {
     root.pendingBand = band
     actionProc.command = ["omarchy-network-band", band]
     actionProc.running = true
-  }
-
-  // The speed test is its own panel plugin (omarchy.speedtest) so a
-  // replacement design can take it over; summon() routes to whichever
-  // implementation is enabled. The payload names the connection when this
-  // panel knows it; the plugin looks it up itself otherwise.
-  function summonSpeedTest() {
-    controller.hide()
-    cancelPasswordPrompt()
-    var connection = ""
-    if (info.type === "wifi") connection = info.ssid || "Wi-Fi"
-    else if (info.type === "ethernet") connection = "Ethernet"
-    bar.shell.summon("omarchy.speedtest", connection ? JSON.stringify({ connection: connection }) : "{}")
   }
 
   function dnsCommand(provider) {
@@ -1194,22 +1174,6 @@ Panel {
             Layout.alignment: Qt.AlignVCenter
             onHovered: function(on) { if (on) root.setHeaderCursor(root.qrHeaderIndex) }
             onClicked: root.summonWifiQr()
-          }
-
-          Button {
-            id: speedAction
-            visible: root.canRunSpeedTest
-            iconText: "󰓅"
-            tooltipText: "Run a speed test"
-            foreground: root.bar.foreground
-            fontFamily: root.bar.fontFamily
-            iconSize: Style.font.subtitle * 1.5
-            horizontalPadding: Style.space(5)
-            verticalPadding: Style.space(2)
-            hasCursor: root.speedHeaderHasCursor
-            Layout.alignment: Qt.AlignVCenter
-            onHovered: function(on) { if (on) root.setHeaderCursor(root.speedHeaderIndex) }
-            onClicked: root.summonSpeedTest()
           }
 
           ToggleSwitch {
