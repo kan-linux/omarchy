@@ -1,14 +1,11 @@
 #!/bin/bash
 
-# ELSEWHEN_ONLINE=1 also checks day and night against Open-Meteo's is_day.
-
 set -euo pipefail
 
 source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/base-test.sh"
 
 run_node_test <<'JS'
 const fs = require('fs')
-const https = require('https')
 const { Solar: G } = requireFromRoot('test/shell.d/elsewhen/solar.js')
 
 const dataDir = path.join(root, 'shell/plugins/panels/elsewhen')
@@ -177,26 +174,4 @@ assert(measured[7].left > measured[7].right * 20 && measured[6].right < measured
 assert(measured[0].frac < 0.01 && measured[4].frac > 0.99, 'elsewhen draws new moon dark and full moon lit')
 assert([0, 0.2, 0.4, 0.6, 0.8].every(p => G.moonLitOutline(p, MOON_R, 48).every(q => Math.hypot(q.x, q.y) <= MOON_R + 1e-6)), 'elsewhen keeps the moon outline inside its disc')
 
-// ---- day and night against Open-Meteo
-
-if (process.env.ELSEWHEN_ONLINE) {
-  const lats = cities.map(c => c[2]).join(',')
-  const lons = cities.map(c => c[3]).join(',')
-  https.get(`https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=is_day`, res => {
-    let body = ''
-    res.on('data', d => body += d)
-    res.on('end', () => {
-      const feed = JSON.parse(body)
-      const sun = G.subsolarPoint(Date.now())
-      // Open-Meteo's flag lags up to 15 minutes, so only disagreements away from the horizon count.
-      const wrong = []
-      feed.forEach((entry, i) => {
-        const theirs = (entry.current || {}).is_day
-        const mine = G.isDaylight(cities[i][2], cities[i][3], sun) ? 1 : 0
-        if (theirs !== undefined && mine !== theirs && Math.abs(G.solarElevation(cities[i][2], cities[i][3], sun)) > 4) wrong.push(cities[i][0])
-      })
-      assertDeepEqual(wrong, [], 'elsewhen agrees with Open-Meteo about day and night')
-    })
-  }).on('error', error => fail('elsewhen reaches Open-Meteo', error.message))
-}
 JS

@@ -1,11 +1,7 @@
-echo "Save incoming Taildrop files to ~/Downloads"
+echo "Skip: the Tailscale integration has been removed"
 
-if omarchy-cmd-present tailscale; then
-  systemctl --user daemon-reload >/dev/null 2>&1 || true
-
-  # Report what systemctl actually said; "could not enable" on its own gives
-  # nothing to act on.
-  if ! error=$(systemctl --user enable --now omarchy-tailscale-receive.service 2>&1); then
-    echo "Could not enable omarchy-tailscale-receive.service: $error"
-  fi
-fi
+# This migration used to enable omarchy-tailscale-receive.service so incoming
+# Taildrop files landed in ~/Downloads. Tailscale and that service are no longer
+# part of Omarchy, so there is nothing to enable.
+# Left as a no-op rather than deleted so installs that already recorded this
+# migration as done keep their history consistent.

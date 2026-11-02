@@ -2,7 +2,7 @@
 
 A world clock for the Omarchy shell: a globe in the bar that opens a panel of clocks, one row per city, with a spinnable globe behind it. It lives in `shell/plugins/panels/elsewhen/` under the plugin id `omarchy.elsewhen`, and file names below are relative to that directory. Its checks live in `test/shell.d/elsewhen/` and run as part of `./test/shell` through `test/shell.d/elsewhen-test.sh`.
 
-Everything it needs is already on an Omarchy install: `date` and `timedatectl` for zone offsets, and `curl` for weather. Weather is the only thing that touches the network: [Open-Meteo](https://open-meteo.com) geocoding and forecasts, without an API key. The globe's coastlines are [Natural Earth](https://www.naturalearthdata.com) 110m (public domain), shipped as `world.json`. Settings live inline on the widget's `shell.json` entry; see [Settings](#settings).
+Everything it needs is already on an Omarchy install: `date` and `timedatectl` for zone offsets, and `/usr/share/zoneinfo/zone1970.tab` for coordinates. **Nothing touches the network.** The globe's coastlines are [Natural Earth](https://www.naturalearthdata.com) 110m (public domain), shipped as `world.json`. Settings live inline on the widget's `shell.json` entry; see [Settings](#settings).
 
 ## Why it shells out to `date`
 
@@ -68,7 +68,7 @@ Two cities may share a zone (Miami and Boca Raton are both `America/New_York`), 
 
 Each row carries a 24-hour bar, midnight to midnight in that city's own clock, with the daylight lit and a marker at now. Read down the column and you can see who is awake: markers inside the lit band are in daylight, markers out at the dark ends are not. Rows are also filled by phase, lightest at midday and darkest at night.
 
-The lit band is the city's real day, from the coordinates the weather lookup already geocodes. Reykjavik's four-hour December day and Auckland's long January one are different shapes, and that difference is most of what a daylight bar is worth looking at. A city the geocoder has not placed yet gets a fixed 06:00-18:00 band until its coordinates arrive.
+The lit band is the city's real day, from the zone's coordinates in `zone1970.tab`. Reykjavik's four-hour December day and Auckland's long January one are different shapes, and that difference is most of what a daylight bar is worth looking at. A zone with no coordinates there gets a fixed 06:00-18:00 band.
 
 The marker turns gold while it is inside the lit band and stays white outside it. That is decided geometrically, from the same span the band draws, not from the phase name - so the sun can never be painted sitting in the dark half of its own bar. The gold is a literal color rather than a theme role, because several themes map the palette name `yellow` to something that isn't yellow.
 
@@ -110,17 +110,9 @@ A press on the row body does still reach the grab, which dismisses, so the two d
 
 ## Weather
 
-Each row shows the current temperature beside the city name, and one glyph beside it: sun, partly cloudy, cloud, rain, or snow. The glyph sits with the temperature because the two are the same fact about being outside.
+Removed. The panel used to fetch the current temperature and a weather glyph per city from [Open-Meteo](https://open-meteo.com) - a geocoding request per city it had no coordinates for, then one batched forecast. Both were overseas requests, and the whole point of this widget is a clock that needs no network, so the feature and its API calls are gone.
 
-Open-Meteo reports WMO present-weather codes - nearly a hundred of them, separating drizzle from freezing drizzle from rain showers. `Model.weatherKind` collapses them to those five, which is all a row has space for; fog joins cloud rather than getting a symbol nobody could read at this size. The code travels with the temperature in the same reading, so the two cannot disagree.
-
-The sun is `white-balance-sunny`, not `weather-sunny`. The obvious one is a hollow ring inside a six-point burst, which at eleven pixels reads as a snowflake - sitting directly beside an actual snowflake. The one in use is a solid disc with short rays, which cannot be mistaken for anything else in the set.
-
-`Number(null)` is `0`, and `0` is the WMO code for *clear sky* - so a missing reading would quietly render a sun. Absent values are rejected before the conversion; `test/shell.d/elsewhen-model-test.sh` covers it.
-
-The panel fetches it with `curl`, in two steps: one geocoding request per city it has no coordinates for yet, then one batched forecast for every city. Both results live in memory as `facts`, keyed `label|zone`. Geocodes last the session (a city does not move) and weather twenty minutes (the resolution the source offers), so opening the panel again soon does no network at all. Nothing here is fatal - a failed fetch keeps the previous value, and failing that the row simply renders without it.
-
-Cities are geocoded by their **label**, not their zone, which matters for aliases: Miami and Boca Raton share `America/New_York` but resolve to their own Florida coordinates and report genuinely different temperatures. Where a label cannot be geocoded, the zone's representative coordinates from `/usr/share/zoneinfo/zone1970.tab` are the fallback; after a network failure that fallback is used for now and the geocode retried on the next refresh.
+What is left of it is inert: `Model.tempLabel`, `Model.weatherKind` and the `weatherGlyph`/`toggleUnits` hooks on the panel stay because `CityRow` still calls them, and both captions already carry `visible: text !== ""`, so with no data they collapse and the row is just name, date and time. Coordinates now come from `/usr/share/zoneinfo/zone1970.tab` alone (see `Model.zoneTabCoords`), which is what feeds the globe and the daylight strip.
 
 ## The hour's greeting
 
@@ -206,7 +198,7 @@ City dots on the globe use the same rule as the list: gold in daylight, pale at 
 
 **The city you are in is always on the globe**, always labelled, and drawn the way the panel globe draws it - the dot in the accent color, a dark edge so it does not vanish into the land, and a halo. It is merged in ahead of everything else, so a built-in or a tracked row of the same name cannot shadow it.
 
-**Cities the list is tracking** get an accent ring around the dot, and first claim on a label slot so they are always named. Matching is by city name, not zone - tracking Miami does not light up New York, because they are different cities that happen to share `America/New_York`. A tracked city that is not one of the globe's own built-ins is merged in using the coordinates the weather script already geocoded, so a city in the list can never be missing from the globe.
+**Cities the list is tracking** get an accent ring around the dot, and first claim on a label slot so they are always named. Matching is by city name, not zone - tracking Miami does not light up New York, because they are different cities that happen to share `America/New_York`. A tracked city that is not one of the globe's own built-ins is merged in using the zone's `zone1970.tab` coordinates, so a city in the list can never be missing from the globe.
 
 Dots are thinned in screen space before anything is drawn: candidates are offered in priority order and one is kept only if it clears the others by a minimum distance, so a dense region like western Europe shows a few legible cities instead of a smear of overlapping dots. Tracked cities and the current selection are exempt and always survive. The survivors change as the globe turns or the panel resizes, since the test is in pixels rather than degrees.
 
@@ -224,9 +216,9 @@ Measured over the open transition, with `smoothMotion` off and on: average paint
 
 **Everything drawn scales with the shell.** Stroke widths and marker radii go through `GlobeModel.scalePx` rather than being pixel literals, because the globe's radius and its labels already follow the shell's base font size, and literal widths would read as proportionally thinner as that size grows. The small globe derives its widths from its own radius, which the large globe cannot do, its radius being hundreds of pixels rather than tens. Widths are floored at one pixel, below which a stroke stops reading as a thin line and starts dropping out of the raster.
 
-Nothing here touches the network at runtime. The coastlines are Natural Earth 110m, simplified with Douglas-Peucker to 68 rings and 1337 points (14 KB), and the cities were geocoded once at build time - both are plain data files in the plugin. Zone offsets come from the same `date` probe the list uses.
+Nothing here touches the network at runtime. The coastlines are Natural Earth 110m, simplified with Douglas-Peucker to 68 rings and 1337 points (14 KB), and the cities were fixed up once at build time - both are plain data files in the plugin. Zone offsets come from the same `date` probe the list uses.
 
-`test/shell.d/elsewhen-globe-test.sh` covers the projection and solar maths, including a check of the terminator against Open-Meteo's `is_day` for every city.
+`test/shell.d/elsewhen-globe-test.sh` covers the projection and solar maths.
 
 ### One selection, two views
 
@@ -246,7 +238,7 @@ The crossing is made on `label|zone`, not on an index. The two views index diffe
 
 The bar at the bottom searches the whole zone catalogue - every IANA city plus the aliases - and turns the globe to whatever is picked, centering it by setting the spin to the city's longitude and `viewLat` to its latitude, taking the short way round.
 
-A city already on the globe is flown to immediately. One that is not is added **for this session only**: the panel geocodes it, and the globe flies there once the coordinates arrive. Nothing is written to `shell.json`, so there is no saved list to delete from, order, or migrate. Want it again, type it again.
+A city already on the globe is flown to immediately. One that is not is added **for this session only**, from the zone's `zone1970.tab` coordinates, and the globe flies there. Nothing is written to `shell.json`, so there is no saved list to delete from, order, or migrate. Want it again, type it again.
 
 Results are drawn over the globe rather than growing the panel, so the globe does not resize under the pointer while a search is being typed.
 
@@ -288,13 +280,13 @@ It is drawn at full strength and oversized rather than sitting at text weight: a
 
 A marker shows the city you are in, in the accent color. It carries a dark edge: the marker can be nearly the same lightness as the filled continents, and without one the dot dissolves into whichever landmass it is sitting on.
 
-**The globe opens on the city you are in.** It flies there as the panel zooms out, so the two motions - growing out of the header and turning round to home - land together rather than one after the other. If your coordinates have not arrived yet, which happens on a cold geocode cache, the request is held and runs the moment they do.
+**The globe opens on the city you are in.** It flies there as the panel zooms out, so the two motions - growing out of the header and turning round to home - land together rather than one after the other. If your coordinates have not been read from `zone1970.tab` yet, the flight is held and runs the moment they are.
 
 **Clicking a city row turns the globe to it** and marks it - so a tap on Tokyo swings the globe round and drops the marker on Japan. It takes the shortest way round rather than always turning forward: Los Angeles to Tokyo is 102 degrees west, not 258 east.
 
 While the globe is showing somewhere else, clicking the header line brings it home. The whole line is the target, not just the name, and it is only live while the globe is away, so it is never a dead click target. Reopening the panel also returns it home.
 
-The opening spin **lands on home** - the animation runs from `homeLon - 1080` to `homeLon`, three whole turns that finish with your own meridian facing you. At rest a `Binding` holds the globe there, standing down while the animation is writing the property. Until the weather script has geocoded your city the marker is hidden and it rests on Greenwich.
+The opening spin **lands on home** - the animation runs from `homeLon - 1080` to `homeLon`, three whole turns that finish with your own meridian facing you. At rest a `Binding` holds the globe there, standing down while the animation is writing the property. Until your city's coordinates have been read the marker is hidden and it rests on Greenwich.
 
 `Easing.OutQuart` over 1250ms puts most of the rotation in the first third and lets the rest coast out, which is what a globe flicked by hand does rather than a motor driving it at a constant rate.
 

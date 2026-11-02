@@ -19,7 +19,7 @@ Plugin ids are namespaced. The built-ins all start with `omarchy.` — `omarchy.
 ## Turning them on and off
 
 ```
-omarchy plugin enable omarchy.tailscale
+omarchy plugin enable omarchy.disk-speedtest
 omarchy plugin disable omarchy.system-update
 ```
 

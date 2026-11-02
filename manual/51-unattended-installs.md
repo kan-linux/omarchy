@@ -16,7 +16,6 @@ The files are exactly what the installer's own wizard writes, so the easiest way
 | `user_email_address.txt` | No | Git email |
 | `user_encrypt_installation.txt` | No | `true` when the configuration carries a `disk_encryption` block |
 | `authorized_keys` | No | SSH public keys, one per line |
-| `tailscale_authkey` | No | Tailscale auth key for joining your tailnet on first boot |
 
 Generate the password hash for `user_credentials.json` with `openssl passwd -6 "yourpassword"`.
 
@@ -25,8 +24,6 @@ You can also drop in an empty file named `defer-provisioning` in place of `user_
 ## SSH access
 
 When `authorized_keys` is present, the install sets the keys up as the user's `~/.ssh/authorized_keys`, enables `sshd`, and opens the firewall for it. (A stock Omarchy install ships openssh with the service disabled and the port closed, so an unattended machine would otherwise be unreachable.) The install only adds your keys — it doesn't loosen any of the SSH daemon's other authentication settings.
-
-When `tailscale_authkey` is present, the machine joins your tailnet on first boot instead: Tailscale is installed from the ISO's bundled packages, the firewall allows the tailnet interface, and a background job runs the join as soon as the machine actually has network, retrying until it succeeds. Use a reusable, pre-authorized key so one drive image can serve many machines.
 
 ## Building the cidata drive
 
