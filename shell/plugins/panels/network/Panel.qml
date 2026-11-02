@@ -119,9 +119,9 @@ Panel {
   property bool cursorActive: false
 
   // Keyboard focus zone for the panel. j/k crosses row boundaries:
-  // header actions ⇄ portal ⇄ band ⇄ DNS row ⇄ Wi-Fi networks. h/l move
+  // header actions ⇄ band ⇄ DNS row ⇄ Wi-Fi networks. h/l move
   // within header actions, band pills, or DNS providers.
-  property string focusSection: "dns"  // "header" | "portal" | "band" | "dns" | "wifi"
+  property string focusSection: "dns"  // "header" | "band" | "dns" | "wifi"
   property int headerIndex: 0
   readonly property bool canDisconnect: !!connectedWifiNetwork
   readonly property bool headerHasDisconnect: false
@@ -210,7 +210,6 @@ Panel {
     function toggleNetwork() { root.toggleNetwork() }
     // Compat routes for configs that summon the centered cards through the
     // network target; the card is its own plugin now.
-    function openCaptivePortal() { root.openCaptivePortal() }
     function checkConnectivity() { root.checkConnectivity() }
   }
 
@@ -312,11 +311,11 @@ Panel {
       refresh(true)
       selectedIndex = wifiNetworks.length > 0 ? 0 : -1
       wifiActionFocused = false
-      focusSection = hasCaptivePortal ? "portal" : (wifiNetworks.length > 0 ? "wifi" : "dns")
+      focusSection = wifiNetworks.length > 0 ? "wifi" : "dns"
       var idx = dnsProviders.indexOf(dnsProvider)
       dnsIndex = idx >= 0 ? idx : 0
       syncBandIndex()
-      cursorActive = hasCaptivePortal
+      cursorActive = false
     } else {
       // Drop a restart armed by this open: without it a close/reopen inside
       // the 100ms window reuses the running timer and re-enables the scanner
@@ -444,8 +443,7 @@ Panel {
     Portal: NetworkConnectivity.Portal, Limited: NetworkConnectivity.Limited,
     Full: NetworkConnectivity.Full, None: NetworkConnectivity.None
   }, connectivityChecksEnabled)
-  readonly property bool hasCaptivePortal: connectivity === "portal"
-  readonly property bool restricted: hasCaptivePortal || connectivity === "limited"
+  readonly property bool restricted: connectivity === "limited" || connectivity === "portal"
   readonly property string icon: Model.connectionIcon(kind, signalStrength, connectivity)
   readonly property string connectionKey: kind === "wifi" && wifiDevice && connectedWifiNetwork
     ? kind + ":" + wifiDevice.name + ":" + connectedWifiNetwork.name
@@ -453,15 +451,6 @@ Panel {
 
   onConnectionKeyChanged: Qt.callLater(checkConnectivity)
   onConnectivityChecksEnabledChanged: Qt.callLater(checkConnectivity)
-  onHasCaptivePortalChanged: {
-    if (hasCaptivePortal && opened && passwordSsid === "") {
-      focusSection = "portal"
-      cursorActive = true
-    } else if (!hasCaptivePortal && focusSection === "portal") {
-      focusSection = headerActionCount > 0 ? "header" : "dns"
-      headerIndex = 0
-    }
-  }
   onRestrictedChanged: {
     connectionPhraseSwap.stop()
     heroMeta.opacity = 1.0
@@ -469,14 +458,6 @@ Panel {
 
   function checkConnectivity() {
     if (connectivityChecksEnabled && kind !== "disconnected") Networking.checkConnectivity()
-  }
-
-  function openCaptivePortal() {
-    if (!hasCaptivePortal) return
-    // Explicit user action only. argv (not a shell string), and a fixed HTTP
-    // URL: let the browser handle the redirect without trusting portal input.
-    Quickshell.execDetached(["omarchy-launch-browser", Model.captivePortalUrl])
-    close()
   }
 
   // Keep checking while login is needed, even with the panel closed in favour
@@ -968,8 +949,7 @@ Panel {
     bar: root.bar
     text: root.icon
     active: root.restricted
-    tooltipText: root.hasCaptivePortal ? "Sign in to this network"
-      : (root.restricted ? "Limited internet access" : "")
+    tooltipText: root.restricted ? "Limited internet access" : ""
 
     onPressed: function(b) {
       if (root.opened) root.close()
@@ -1016,22 +996,12 @@ Panel {
           // Hidden sections drop out of the keyboard chain entirely.
           if (root.focusSection === "header") {
             if (dy > 0) {
-              if (root.hasCaptivePortal) {
-                root.focusSection = "portal"
-              } else if (root.canSelectBand) {
+              if (root.canSelectBand) {
                 root.focusSection = "band"
                 root.bandAutoFocused = true
               } else {
                 root.focusSection = "dns"
               }
-            }
-          } else if (root.focusSection === "portal") {
-            if (dy < 0 && root.headerActionCount > 0) {
-              root.focusSection = "header"
-              root.headerIndex = 0
-            } else if (dy > 0) {
-              root.focusSection = root.canSelectBand ? "band" : "dns"
-              root.bandAutoFocused = true
             }
           } else if (root.focusSection === "band") {
             // Automatic on the header line, then the pills -- which collapse
@@ -1039,8 +1009,6 @@ Panel {
             if (dy < 0) {
               if (!root.bandAutoFocused) {
                 root.bandAutoFocused = true
-              } else if (root.hasCaptivePortal) {
-                root.focusSection = "portal"
               } else if (root.headerActionCount > 0) {
                 root.focusSection = "header"
                 root.headerIndex = 0
@@ -1058,8 +1026,6 @@ Panel {
               if (root.canSelectBand) {
                 root.focusSection = "band"
                 root.bandAutoFocused = !root.bandPillsVisible
-              } else if (root.hasCaptivePortal) {
-                root.focusSection = "portal"
               } else if (root.headerActionCount > 0) {
                 root.focusSection = "header"
                 root.headerIndex = 0
@@ -1088,7 +1054,6 @@ Panel {
       onActivateRequested: {
         if (root.cursorActive) {
           if (root.focusSection === "header") root.activateHeader()
-          else if (root.focusSection === "portal") root.openCaptivePortal()
           else if (root.focusSection === "band") root.activateBand()
           else if (root.focusSection === "dns") root.activateDns()
           else root.activateSelected()
@@ -1191,7 +1156,6 @@ Panel {
             textFormat: Text.PlainText
             width: parent.width
             text: {
-              if (root.hasCaptivePortal) return "SIGN-IN REQUIRED"
               if (root.restricted) return "LIMITED INTERNET ACCESS"
               if (root.info.type === "wifi") {
                 if (root.canDisconnect) return root.connectionPhrase.toUpperCase()
@@ -1212,43 +1176,6 @@ Panel {
           }
         }
 
-      }
-
-      Column {
-        visible: root.hasCaptivePortal
-        width: parent.width
-        spacing: Style.space(6)
-
-        Button {
-          id: portalAction
-          width: parent.width
-          text: "Open Captive Portal"
-          iconText: "󰏌"
-          foreground: root.bar.urgent
-          accent: root.bar.urgent
-          fontFamily: root.bar.fontFamily
-          verticalPadding: Style.space(10)
-          bordered: true
-          active: true
-          hasCursor: root.cursorActive && root.focusSection === "portal"
-          onHovered: function(on) {
-            if (!on) return
-            root.cursorActive = true
-            root.focusSection = "portal"
-          }
-          onClicked: root.openCaptivePortal()
-        }
-
-        Text {
-          width: parent.width
-          text: "Sign in or accept this network’s terms to access the internet."
-          textFormat: Text.PlainText
-          wrapMode: Text.WordWrap
-          color: root.bar.foreground
-          opacity: 0.7
-          font.family: root.bar.fontFamily
-          font.pixelSize: Style.font.bodySmall
-        }
       }
 
       // Connection details: transfer metrics first, then IP/Gateway.
@@ -1690,7 +1617,6 @@ Panel {
       if (isBusy && root.actionKind === "disconnect") return "Disconnecting…"
       if (isBusy && root.actionKind === "forget") return "Forgetting…"
       if (isFailed) return root.failureReason || "Failed"
-      if (isConnected && root.kind === "wifi" && root.hasCaptivePortal) return "Sign-in required"
       if (isConnected) return "Connected"
       return ""
     }
@@ -1698,7 +1624,6 @@ Panel {
     readonly property color statusColor: {
       if (isFailed) return root.bar.urgent
       if (isBusy) return root.bar.foreground
-      if (isConnected && root.kind === "wifi" && root.hasCaptivePortal) return root.bar.urgent
       if (isConnected) return root.bar.foreground
       return Qt.darker(root.bar.foreground, 1.5)
     }

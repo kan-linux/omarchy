@@ -88,7 +88,12 @@ Item {
   function remove(desktopId, name) {
     var id = String(desktopId || "")
     if (!id) return
-    Util.execDetached(Util.shellQuote(root.omarchyPath + "/bin/omarchy-remove-launcher-entry") + " " + Util.shellQuote(id) + " " + Util.shellQuote(String(name || id)))
+    // No package manager here, so this drops the launcher entry only; there is
+    // nothing that could uninstall the program itself. The id is reduced to a
+    // filename-safe shape before it is pasted into the shell line.
+    var safe = id.replace(/[^A-Za-z0-9._-]/g, "")
+    if (!safe) return
+    Util.execDetached('rm -f "$HOME/.local/share/applications/' + safe + '.desktop"')
   }
 
   function normalizeDesktopId(id) {

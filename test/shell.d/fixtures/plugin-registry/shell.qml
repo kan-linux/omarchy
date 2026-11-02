@@ -94,7 +94,7 @@ ShellRoot {
     localWidget.omarchy = { clonedFrom: "omarchy.first-widget" }
     scan += block("thirdparty", "/third/local-widget", localWidget)
     var localWeather = manifest("local.weather", ["bar-widget"], { barWidget: "Widget.qml" })
-    localWeather.omarchy = { clonedFrom: "omarchy.weather" }
+    localWeather.omarchy = { clonedFrom: "omarchy.elsewhen" }
     scan += block("thirdparty", "/third/local-weather", localWeather)
     var localHybrid = manifest("local.hybrid", ["menu", "bar-widget"], { menu: "Menu.qml", barWidget: "Widget.qml" })
     localHybrid.omarchy = { clonedFrom: "omarchy.hybrid" }
@@ -188,7 +188,7 @@ ShellRoot {
       bar: {
         layout: {
           left: [{ id: "omarchy.workspaces" }, { id: "omarchy.menu" }],
-          center: [{ id: "omarchy.weather" }, { id: "omarchy.clock" }],
+          center: [{ id: "omarchy.elsewhen" }, { id: "omarchy.clock" }],
           right: [{ id: "omarchy.tray" }]
         }
       },
@@ -203,7 +203,7 @@ ShellRoot {
     registry.setEnabled("third.center-widget", true)
     root.assertDeepEqual(
       root.config.bar.layout.center,
-      [{ id: "omarchy.weather" }, { id: "third.center-widget" }, { id: "omarchy.clock" }],
+      [{ id: "omarchy.elsewhen" }, { id: "third.center-widget" }, { id: "omarchy.clock" }],
       "widgets without a default section use the center anchor"
     )
     registry.setEnabled("third.right-widget", true)
@@ -234,7 +234,7 @@ ShellRoot {
     // A bar the placement's neighbour is not on still gets the widget.
     root.config = {
       version: 1,
-      bar: { layout: { left: [], center: [{ id: "omarchy.weather" }], right: [] } },
+      bar: { layout: { left: [], center: [{ id: "omarchy.elsewhen" }], right: [] } },
       plugins: []
     }
     root.assertTrue(
@@ -246,7 +246,7 @@ ShellRoot {
       "could not find target widget omarchy.first-widget",
       "a refused enable names the target it could not find"
     )
-    root.assertDeepEqual(root.config.bar.layout.center, [{ id: "omarchy.weather" }], "a refused enable places nothing")
+    root.assertDeepEqual(root.config.bar.layout.center, [{ id: "omarchy.elsewhen" }], "a refused enable places nothing")
     root.assertEqual(
       registry.putBarWidget("third.center-widget", { after: "omarchy.first-widget" }),
       "",
@@ -254,14 +254,14 @@ ShellRoot {
     )
     root.assertDeepEqual(
       root.config.bar.layout.center,
-      [{ id: "omarchy.weather" }, { id: "third.center-widget" }],
+      [{ id: "omarchy.elsewhen" }, { id: "third.center-widget" }],
       "put falls back to the section anchor when its target is missing"
     )
 
     // The anchor sits after the clone, so a fallback would land elsewhere.
     root.config = {
       version: 1,
-      bar: { layout: { left: [], center: [{ id: "local.first-widget" }, { id: "omarchy.weather" }], right: [] } },
+      bar: { layout: { left: [], center: [{ id: "local.first-widget" }, { id: "omarchy.elsewhen" }], right: [] } },
       plugins: []
     }
     root.assertEqual(
@@ -271,7 +271,7 @@ ShellRoot {
     )
     root.assertDeepEqual(
       root.config.bar.layout.center,
-      [{ id: "local.first-widget" }, { id: "third.center-widget" }, { id: "omarchy.weather" }],
+      [{ id: "local.first-widget" }, { id: "third.center-widget" }, { id: "omarchy.elsewhen" }],
       "a clone stands in for the widget it was cloned from as a placement target"
     )
 

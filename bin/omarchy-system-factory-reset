@@ -167,15 +167,11 @@ stage_luks_rekey() {
 install_provisioning_units() {
   local next="$1" unit_src="$2"
 
-  install -Dm644 "$unit_src/omarchy-provision-owner.service" \
-    "$next/etc/systemd/system/omarchy-provision-owner.service"
   install -Dm644 "$unit_src/omarchy-system-factory-reset-finish.service" \
     "$next/etc/systemd/system/omarchy-system-factory-reset-finish.service"
 
   install -d "$next/etc/systemd/system/multi-user.target.wants" \
     "$next/etc/systemd/system/sysinit.target.wants"
-  ln -sf /etc/systemd/system/omarchy-provision-owner.service \
-    "$next/etc/systemd/system/multi-user.target.wants/omarchy-provision-owner.service"
   ln -sf /etc/systemd/system/omarchy-system-factory-reset-finish.service \
     "$next/etc/systemd/system/sysinit.target.wants/omarchy-system-factory-reset-finish.service"
 }
@@ -342,7 +338,7 @@ stage_full_reset() {
   btrfs subvolume snapshot "$top/@factory" "$next" >>"$LOG_FILE"
 
   local unit_src="$next/usr/share/omarchy/install/provisioning"
-  [[ -f $unit_src/omarchy-provision-owner.service && -x $next/usr/bin/omarchy-provision-owner ]] ||
+  [[ -f $unit_src/omarchy-system-factory-reset-finish.service ]] ||
     fail "the factory snapshot predates provisioning support; cannot reset from it"
 
   log "Scrubbing machine identity from the factory system"

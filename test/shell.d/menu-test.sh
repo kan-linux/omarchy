@@ -158,18 +158,6 @@ const ranked = menu.mergeAppRows(rankBase.items, rankBase.itemOrder, [
 ])
 const rankScore = (id, query) => menu.searchScore(ranked.items, ranked.items[id], query)
 assert(
-  ['install.browser.brave', 'remove.browser.brave', 'setup.default.browser.brave'].every(
-    id => rankScore('apps.brave', 'brave') < rankScore(id, 'brave')
-  ),
-  'menu ranks an installed app above menu entries matching the query equally well'
-)
-assert(
-  ['install.browser.zen', 'remove.browser.zen', 'setup.default.browser.zen'].every(
-    id => rankScore('apps.zen', 'zen') < rankScore(id, 'zen')
-  ),
-  'menu ranks an app matching the query as a whole word above exact-labeled menu entries'
-)
-assert(
   rankScore('style.font', 'font') < rankScore('apps.fontforge', 'font'),
   'menu keeps a better-matching menu entry above a weaker app match'
 )
@@ -203,19 +191,6 @@ assertEqual(
   'menu opens the emoji picker from Trigger'
 )
 assert(
-  defaultById['update.omarchy'].icon === '\ue900',
-  'menu update Omarchy entry uses the Omarchy glyph'
-)
-assert(
-  defaultById['update.omarchy'].iconFont === 'omarchy',
-  'menu update Omarchy entry renders the private glyph with the Omarchy font'
-)
-assertEqual(
-  defaultById['update.themes'].when,
-  'omarchy-theme-extras',
-  'menu hides Extra Themes until a theme cloned from git is there to update'
-)
-assert(
   defaultById['setup.input'].action.includes('input.lua'),
   'menu keeps Input as a direct config action'
 )
@@ -232,111 +207,6 @@ assertEqual(
   setupEntries[setupEntries.length - 1].id,
   'setup.reset',
   'menu lists Reset Computer last under Setup'
-)
-const expectedAgents = {
-  agy: { icon: '󰫢', label: 'Antigravity' },
-  pi: { icon: '\ue901', iconFont: 'omarchy', label: 'Pi' },
-  omp: { icon: '\ue903', iconFont: 'omarchy', label: 'omp' },
-  opencode: { icon: '\ue902', iconFont: 'omarchy', label: 'OpenCode' },
-  ori: { icon: '\ue909', iconFont: 'omarchy', label: 'Ori' },
-  claude: { icon: '󰛄', label: 'Claude' },
-  codex: { icon: '\ue905', iconFont: 'omarchy', label: 'Codex' },
-  grok: { icon: '\ue904', iconFont: 'omarchy', label: 'Grok' },
-  hermes: { icon: '\ue90a', iconFont: 'omarchy', label: 'Hermes' },
-  openclaw: { icon: '\ue90c', iconFont: 'omarchy', label: 'OpenClaw' },
-  copilot: { icon: '', label: 'Copilot' },
-  crush: { icon: '󰋑', label: 'Crush' },
-  muse: { icon: '󰛤', label: 'Muse Code' },
-  'cursor-agent': { icon: '\ue90d', iconFont: 'omarchy', label: 'Cursor CLI' },
-
-}
-assert(
-  Object.entries(expectedAgents).every(([agent, expected]) => {
-    const entry = defaultById[`setup.default.agent.${agent}`]
-    return entry
-      && entry.icon === expected.icon
-      && entry.iconFont === (expected.iconFont || '')
-      && entry.label === expected.label
-      && entry.action === `omarchy-default-agent ${agent}`
-      && !entry.when
-      && entry.checked.includes(`== \"${agent}\"`)
-  }),
-  'menu exposes every supported coding agent with its own glyph under Defaults > Agent'
-)
-assertDeepEqual(
-  defaultItems
-    .filter(item => item.parent === 'setup.default.agent')
-    .map(item => item.label),
-  ['Antigravity', 'Claude', 'Codex', 'Copilot', 'Crush', 'Cursor CLI', 'Grok', 'Hermes', 'Muse Code', 'omp', 'OpenClaw', 'OpenCode', 'Ori', 'Pi'],
-  'menu sorts coding agents alphabetically'
-)
-const expectedDefaults = {
-  browser: ['Chromium', 'Chrome', 'Brave', 'Brave Origin', 'Edge', 'Firefox', 'Zen'],
-  terminal: ['Alacritty', 'Foot', 'Ghostty', 'Kitty'],
-  editor: ['Neovim', 'VSCode', 'Cursor', 'Zed', 'Sublime Text', 'Helix', 'Vim', 'Emacs']
-}
-assert(
-  Object.entries(expectedDefaults).every(([type, labels]) => {
-    const entries = defaultItems.filter(item => item.parent === `setup.default.${type}`)
-    return entries.map(item => item.label).join('\0') === labels.join('\0')
-      && entries.every(item => !item.when)
-  }),
-  'menu always exposes every supported browser, terminal, and editor under Defaults'
-)
-assert(!defaultById['install.ai.crush'], 'menu removes Crush from Install > AI')
-// Software you already have keeps its place in Install, dimmed rather than
-// dropped, so the list reads as a catalog of what Omarchy can install.
-// Chromium Account is the sole Install row with anything left to hide for, so
-// any other `when:` here is a row that went back to vanishing once installed.
-assertDeepEqual(
-  defaultItems
-    .filter(item => item.id.startsWith('install.') && item.action && item.when)
-    .map(item => item.id),
-  ['install.service.chromium-account'],
-  'menu never hides an Install row because the software is already there'
-)
-assert(
-  ['install.browser.zen', 'install.editor.vscode', 'install.gaming.steam', 'install.development.rust', 'install.windows'].every(
-    id => defaultById[id].disabled && !defaultById[id].when
-  ),
-  'menu dims the Install rows for software that is already installed'
-)
-assertEqual(
-  defaultById['install.browser.zen'].disabled,
-  'omarchy-pkg-present zen-browser-bin',
-  'menu asks the same presence question it used to hide the row with'
-)
-// A guard can still be about something other than having the software: no
-// Chromium at all means no account to wire up, and that row stays hidden.
-assert(
-  defaultById['install.service.chromium-account'].when === '[[ -f ~/.config/chromium-flags.conf ]]'
-    && defaultById['install.service.chromium-account'].disabled.includes('oauth2-client-id'),
-  'menu keeps hiding Chromium Account without Chromium, and dims it once the account is set up'
-)
-assert(
-  defaultItems.filter(item => item.id.startsWith('remove.')).every(item => !item.disabled)
-    && defaultById['remove.browser.zen'].when === 'omarchy-pkg-present zen-browser-bin',
-  'menu still hides Remove rows for software that is not installed'
-)
-assertDeepEqual(
-  defaultItems
-    .filter(item => item.parent === 'remove')
-    .map(item => item.id),
-  [
-    'remove.package',
-    'remove.ai',
-    'remove.service',
-    'remove.development',
-    'remove.theme',
-    'remove.gaming',
-    'remove.browser',
-    'remove.webapp',
-    'remove.tui',
-    'remove.windows',
-    'remove.preinstalls',
-    'remove.security'
-  ],
-  'menu orders Remove categories like their Install counterparts, followed by Remove-only categories'
 )
 assert(
   defaultById['setup.security.passwordless-sudo'].action.includes('omarchy-sudo-passwordless'),

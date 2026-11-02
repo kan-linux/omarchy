@@ -14,8 +14,7 @@ ShellRoot {
     "omarchy.bluetooth",
     "omarchy.monitor",
     "omarchy.network",
-    "omarchy.power",
-    "omarchy.weather"
+    "omarchy.power"
   ]
 
   function fail(message) {

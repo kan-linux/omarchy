@@ -71,11 +71,6 @@ cat >"$watch_bin/journalctl" <<'SH'
 cat "$JOURNAL_ENTRIES"
 SH
 
-cat >"$watch_bin/omarchy-default-agent" <<'SH'
-#!/bin/bash
-echo claude
-SH
-
 cat >"$watch_bin/omarchy-notification-wait" <<'SH'
 #!/bin/bash
 exit 0
@@ -86,7 +81,7 @@ cat >"$watch_bin/omarchy-notification-send" <<'SH'
 printf '%s\n' "$*" >>"$NOTIFY_LOG"
 SH
 
-chmod +x "$watch_bin/journalctl" "$watch_bin/omarchy-default-agent" \
+chmod +x "$watch_bin/journalctl" \
   "$watch_bin/omarchy-notification-wait" "$watch_bin/omarchy-notification-send"
 
 reset_entries() {
@@ -372,11 +367,6 @@ refusal=$(HOME="$mute_home" PATH="$failing_bin:$ROOT/bin:$PATH" \
 ! grep -Fq "Muted crash notifications" <<<"$refusal" ||
   fail "a mute that could not be written still reports success, so the user believes a program is silenced when it is not"
 pass "a mute that could not be written is not reported as one"
-
-skill="$ROOT/default/agents/skills/diagnose-crash/SKILL.md"
-grep -Fq 'omarchy-crash-mute' "$skill" ||
-  fail "the diagnosis no longer names the command that mutes, so the offer it makes cannot be carried out"
-pass "the diagnosis names the command that mutes"
 
 grep -Fq 'GROUP_DESCRIPTIONS[crash]' "$ROOT/bin/omarchy" ||
   fail "the crash group has no description, so the router lists a group it cannot describe"

@@ -51,10 +51,10 @@ jq -e '
   def ids: map(.id // .);
   (.bar.layout.right | ids) as $ids |
   ($ids | index("omarchy.tray")) as $tray |
-  ($ids | index("omarchy.agents")) as $agents |
-  $tray != null and $agents == $tray + 1
+  ($ids | index("omarchy.bluetooth")) as $bluetooth |
+  $tray != null and $bluetooth == $tray + 1
 ' "$ROOT/config/omarchy/shell.json" >/dev/null
-pass "default right layout keeps agents next to the tray"
+pass "default right layout keeps bluetooth next to the tray"
 
 ROOT="$ROOT" python3 <<'PY'
 import json
@@ -246,7 +246,7 @@ cat >"$TMPDIR/home/.config/omarchy/shell.json" <<'JSON'
   "bar": {
     "layout": {
       "left": [{ "id": "omarchy.menu" }, { "id": "omarchy.workspaces" }, { "id": "omarchy.active-window" }],
-      "center": [{ "id": "omarchy.clock" }, { "id": "omarchy.system-update" }],
+      "center": [{ "id": "omarchy.clock" }, { "id": "omarchy.keyboard-layout" }],
       "right": [{ "id": "omarchy.tray" }, { "id": "omarchy.microphone" }, { "id": "omarchy.bluetooth" }]
     }
   },
