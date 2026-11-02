@@ -66,13 +66,13 @@ Omarchy ships with a bunch of ergonomic aliases and helpful functions, but it's 
 
 Look, this is your computer. You can do whatever you want with it, but I would advise against making changes to the files in `/usr/share/omarchy` directly. They belong to the Omarchy pacman package, so your changes will simply be overwritten on the next update. You're better off just overwriting any default values you don't like in the `~/.config/*` folder instead.
 
-You can change just about everything that way, like the default keybindings. Just edit `~/.config/hypr/bindings.lua` to, say, replace [Obsidian](https://obsidian.md/) with [Joplin](https://joplinapp.org/) (install with `omarchy-pkg-add joplin-bin`):
+You can change just about everything that way, like the default keybindings. Just edit `~/.config/hypr/bindings.lua` to, say, bind [Joplin](https://joplinapp.org/) to `Super + Shift + O` (install with `omarchy-pkg-add joplin-bin`):
 
 ```lua
-o.rebind("SUPER + SHIFT + O", "Joplin", "joplin-desktop")
+o.bind("SUPER + SHIFT + O", "Joplin", "joplin-desktop")
 ```
 
-`o.rebind` removes the existing binding before adding its replacement. It takes the same arguments as `o.bind`, including launch helpers and binding options. Use `o.bind` to add a binding, or `hl.unbind` to remove one without replacing it.
+`o.bind` adds a binding. Use `o.rebind` instead when you want to replace an existing one — it removes the existing binding before adding its replacement. It takes the same arguments as `o.bind`, including launch helpers and binding options. Use `hl.unbind` to remove a binding without replacing it.
 
 If you insist on hacking on the internal Omarchy files, switch to the dev channel via _Update > Channel > Dev_. That links Omarchy to a git checkout of the source code in `~/omarchy`, which you're free to change to your heart's content. Ain't nobody here to tell you what to do!
 

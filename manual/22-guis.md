@@ -16,13 +16,13 @@ Obsidian is free for all purposes, including personal, commercial, and non-profi
 
 Obsidian also offers a [commercial add-on for syncing](https://obsidian.md/sync) with mobile apps on iOS and Android. (https://obsidian.md/pricing).
 
-You start Obsidian with `Super + Shift + O`. To use theme syncing, you must select the `Omarchy` theme under settings.
+You start Obsidian from the application launcher (`Super + Space`). To use theme syncing, you must select the `Omarchy` theme under settings.
 
 ## Omawrite
 
 [Omawrite](https://github.com/omacom-io/omawrite) is Omarchy's own dead-simple Markdown writing app. No vaults, no plugins, just you and the words.
 
-You start Omawrite with `Super + Shift + W`.
+You start Omawrite from the application launcher (`Super + Space`).
 
 ## Pinta
 
@@ -75,7 +75,7 @@ You start Omacalc with `Super + Ctrl + Q` (or the calculator key, if your keyboa
 
 [Signal](https://signal.org/) is the pioneer of E2E encrypted messaging, and a great communication option for anyone who'd prefer not to go through one of the big tech conglomerates.
 
-You start Signal with `Super + Shift + G`. It's not part of the base install, so the first time you hit that, Omarchy will offer to install it for you (it's also under _Install > Service_ in the Omarchy menu).
+You start Signal from the application launcher (`Super + Space`). It's not part of the base install, so the first time you do, Omarchy will offer to install it for you (it's also under _Install > Service_ in the Omarchy menu).
 
 ## mpv
 

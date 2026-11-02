@@ -6,7 +6,7 @@ They'll then be accessible through the app launcher (`Super + Space`), and use t
 
 If you wish to remove a web app, just go to _Remove > Web App_ in the Omarchy menu.
 
-It's best if you log into all your accounts using a regular browser before using the web app shortcuts. The thin wrapper frame doesn't work well with 1password, so just easier to be logged in directly first.
+It's best if you log into all your accounts using a regular browser before using the web apps. The thin wrapper frame doesn't work well with 1password, so just easier to be logged in directly first.
 
 All the keyboard hotkeys for these web apps can be changed in `~/.config/hypr/bindings.lua`.
 
@@ -18,7 +18,7 @@ By default, Omarchy already ships with an assortment of default apps:
 
 [HEY](https://www.hey.com/) is an email and calendar service that serves as a great alternative to people tired of Gmail, Outlook, or Apple Mail. It's made by [37signals](https://37signals.com/) where Omarchy originated.
 
-You can start HEY Email using `Super + Shift + E`, jump straight to composing a new email using `Super + Shift + Alt + E`, and start HEY Calendar using `Super + Shift + C`.
+You can start HEY Email, a new email, or HEY Calendar using the application launcher (`Super + Space`).
 
 ## Basecamp
 
@@ -30,37 +30,35 @@ You can start Basecamp using the application launcher (`Super + Space`)
 
 [ChatGPT](https://chatgpt.com) is the most popular AI chat bot in the world.
 
-You can start ChatGPT using `Super + Shift + A`.
+You can start ChatGPT using the application launcher (`Super + Space`).
 
 ## Grok
 
 [Grok](https://grok.com) is xAI's chat bot.
 
-You can start Grok using `Super + Shift + Alt + A`.
+You can start Grok using the application launcher (`Super + Space`).
 
 ## WhatsApp
 
 [WhatsApp](https://www.whatsapp.com/) is one of the most popular messaging services in the world, and the web version is a great option for Linux.
 
-You can start WhatsApp using `Super + Shift + Alt + G`.
+You can start WhatsApp using the application launcher (`Super + Space`).
 
 ## Google apps
 
-Google Messages, Google Photos, Google Maps, and Google Contacts are all included as web apps too.
-
-You can start Google Messages using `Super + Shift + Ctrl + G`, Google Photos using `Super + Shift + P`, and Google Maps using `Super + Shift + S`. Google Contacts is available through the app launcher (`Super + Space`).
+Google Messages, Google Photos, Google Maps, and Google Contacts are all included as web apps too. Start any of them using the application launcher (`Super + Space`).
 
 ## X
 
 X is where news break.
 
-You can start X using `Super + Shift + X` and go straight to writing a new post with `Super + Shift + Alt + X`.
+You can start X using the application launcher (`Super + Space`).
 
 ## YouTube
 
 [YouTube](https://youtube.com/) is the most popular video platform in the world.
 
-You can start YouTube using `Super + Shift + Y`.
+You can start YouTube using the application launcher (`Super + Space`).
 
 ## Zoom
 
