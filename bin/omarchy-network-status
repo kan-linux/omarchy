@@ -5,7 +5,10 @@
 # omarchy:args=[--verbose]
 
 verbose=false
-internet_probe=1.1.1.1
+# AliDNS, anycast so the latency reflects the nearest node. Needs to answer
+# ICMP (114.114.114.114 does not) and sit on a domestic path: 1.1.1.1 measured
+# the cross-border route instead, inflating latency and loss.
+internet_probe=223.5.5.5
 
 case "${1:-}" in
   "")
