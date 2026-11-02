@@ -54,7 +54,7 @@ require("default.hypr.helpers")
 o.bind("A", "listed menu", { menu = "theme" })
 o.bind("B", "unlisted menu", { menu = "setup.power" })
 o.bind("C", "listed panel", { panel = "omarchy.emojis" })
-o.bind("D", "unlisted panel", { panel = "omarchy.wifiqr" })
+o.bind("D", "unlisted panel", { panel = "omarchy.disk-speedtest" })
 o.bind("E", "listed audio", { audio = "raise" })
 o.bind("F", "unlisted audio", { audio = "+1" })
 o.bind("I", "listed brightness", { brightness = "raise" })
@@ -78,7 +78,7 @@ expect_binding() {
 expect_binding $'global\tomarchy:menu.theme\tlisted menu' "a listed menu route binds its global shortcut"
 expect_binding $'exec\tomarchy-menu toggle \'setup.power\'\tunlisted menu' "an unlisted menu route falls back to the command"
 expect_binding $'global\tomarchy:panel.omarchy.emojis\tlisted panel' "a listed panel binds its global shortcut"
-expect_binding $'exec\tomarchy-shell shell toggle \'omarchy.wifiqr\'\tunlisted panel' "an unlisted panel falls back to the command"
+expect_binding $'exec\tomarchy-shell shell toggle \'omarchy.disk-speedtest\'\tunlisted panel' "an unlisted panel falls back to the command"
 expect_binding $'global\tomarchy:audio.raise\tlisted audio' "a listed volume key binds its global shortcut"
 expect_binding $'exec\tomarchy-audio-output-volume \'+1\'\tunlisted audio' "an unlisted volume step falls back to the script"
 expect_binding $'global\tomarchy:brightness.raise\tlisted brightness' "a listed brightness key binds its global shortcut"

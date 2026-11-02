@@ -6,9 +6,7 @@ That panel scans for Wi-Fi networks, shows signal strength, and connects. Ethern
 
 ## Sharing your Wi-Fi
 
-Rather than reading a long password out loud, run _Setup > Network > QR Code_ while you're on Wi-Fi. That puts a QR code on screen that any phone camera can scan to join. It's one of those things you'll use more than you'd expect once you know it's there.
-
-If you actually need the password itself, `omarchy network password <interface>` prints it.
+If you need the password for the network you're on, `omarchy network password <interface>` prints it.
 
 ## DNS
 

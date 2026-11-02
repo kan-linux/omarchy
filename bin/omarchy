@@ -371,8 +371,8 @@ command_requires_args() {
 }
 
 # A command whose documented arguments are all flags can't take a word, so a
-# word after it names something else: `omarchy agent account` is the account
-# commands, not an argument to omarchy-agent.
+# word after it names something else: `omarchy channel set` is the channel
+# subcommands, not an argument to a flags-only command.
 command_takes_only_flags() {
   local key="$1"
   local args="${COMMAND_ARGS[$key]}"

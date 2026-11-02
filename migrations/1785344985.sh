@@ -1,10 +1,9 @@
-echo "Add the agents widget to the bar"
+echo "Remove the agents widget from the bar"
 
-# The widget is now in the default layout. It draws nothing until a provider
-# reports usage — Panel.qml is `visible: providers.length > 0`, and Main.qml
-# only counts a provider that is enabled *and* has recorded prompts, sessions,
-# active days, or a rate limit. So adding it to every existing bar is free:
-# machines without Claude Code or Codex never see it.
+# The widget this migration used to add is gone. Strip it from every section of
+# a curated bar, along with the id it had before the rename, so an existing
+# install ends up matching the shipped default instead of carrying a bar entry
+# nothing can resolve. Idempotent: removing an absent id is a no-op.
 
 config_file="$HOME/.config/omarchy/shell.json"
 
@@ -20,28 +19,16 @@ if [[ -s $config_file ]]; then
         ""
       end;
 
-    def has_widget($id):
-      [(.bar.layout // {}) | to_entries[] | .value | select(type == "array") | .[] | entry_id]
-        | any(. == $id);
+    def drop_agent:
+      map(select((entry_id) != "omarchy.agents" and (entry_id) != "omarchy.model-usage"));
 
-    def insert_after($anchor; $entry):
-      if type != "array" then
-        [$entry]
-      else
-        ([range(0; length) as $i | select((.[$i] | entry_id) == $anchor) | $i][0]) as $anchor_index |
-        if $anchor_index == null then
-          [$entry] + .
-        else
-          .[0:$anchor_index + 1] + [$entry] + .[$anchor_index + 1:]
-        end
-      end;
-
-    # Respect a bar the user already curated: only place the widget when it is
-    # absent from every section, never a second copy.
-    if has_widget("omarchy.agents") then
-      .
-    else
-      .bar.layout.right |= insert_after("omarchy.tray"; { id: "omarchy.agents" })
-    end
+    (if (.bar.layout? | type) == "object" then
+      .bar.layout |= map_values(if type == "array" then drop_agent else . end)
+    else . end)
+    | (if (.disabledPlugins? | type) == "array" then
+      .disabledPlugins |= map(select(. != "omarchy.agents" and . != "omarchy.model-usage"))
+    else . end)
   ' "$config_file" >"$tmp" && mv "$tmp" "$config_file" || rm -f "$tmp"
 fi
+
+rm -rf "$HOME/.local/state/omarchy/agents"

@@ -41,7 +41,6 @@ const overlays = {
   'shell/plugins/clipboard/Clipboard.qml': 'shown: root.opened',
   'shell/plugins/osd/Osd.qml': 'shown: root.opened',
   'shell/plugins/reminders/ReminderFlow.qml': 'shown: root.opened',
-  'shell/plugins/panels/wifiqr/Panel.qml': 'shown: root.opened',
   'shell/plugins/image-picker/ImagePicker.qml': 'shown: root.opened',
 }
 for (const [file, shown] of Object.entries(overlays)) {
