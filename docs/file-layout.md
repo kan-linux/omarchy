@@ -284,12 +284,8 @@ and/or a working user systemd instance:
   `install/user/first-run/gtk-primary-paste.sh` — GNOME/GTK settings that
   need the dconf daemon.
 - `install/user/first-run/audio-tuning.sh` — apply speaker tuning.
-- `install/user/first-run/welcome.sh` — keybindings toast that greets the
-  first login and opens the cheatsheet when clicked. The caller runs
-  `omarchy-notification-wait` once before this and the Wi-Fi step, so both
-  toasts land on a live notification server.
-- `install/user/first-run/wifi.sh` — Wi-Fi/update toasts (waits detached on
-  `nm-online` so the update prompt only lands once there is a connection).
+
+`install/user/first-run/welcome.sh` and `install/user/first-run/wifi.sh` remain in the tree but are not invoked: entering the desktop must not raise the keybindings or Setup Wi-Fi toasts.
 
 The entire sequence has one idempotency marker:
 `~/.local/state/omarchy/done/first-run-user`, managed by `omarchy-done`.
