@@ -1476,4 +1476,16 @@ Item {
       }
     }
   }
+
+  AppGrid {
+    id: appGrid
+    appLibrary: root.appLibrary
+  }
+
+  ShellIpc {
+    target: "omarchy.menu"
+
+    // What the Apps row runs: the app grid, not a submenu of rows.
+    function apps(): void { appGrid.toggle() }
+  }
 }

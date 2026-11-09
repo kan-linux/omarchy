@@ -130,6 +130,15 @@ QtObject {
     return text.slice(0, -1)                                     // Backspace: char
   }
 
+  // The arrow a horizontal key press means in the reading direction. With vim
+  // set, h and l count as Left and Right too.
+  function readingKey(event, vim) {
+    var key = event.key
+    if (vim && (key === Qt.Key_H || event.text === "h")) key = Qt.Key_Left
+    else if (vim && (key === Qt.Key_L || event.text === "l")) key = Qt.Key_Right
+    return key
+  }
+
   // Layout normalization shared by bar config consumers
   // so the two never drift. Entries are deep-cloned to decouple from the
   // input config; consumers can mutate without leaking back to shell.json.

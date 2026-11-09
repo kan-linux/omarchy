@@ -179,6 +179,29 @@ assert(
   /function resolveRoute\(input\) \{\s*\n\s*return MenuModel\.resolveRoute\(root\.items, root\.itemOrder, input\)\s*\n\s*\}/.test(menuQml),
   'menu delegates route resolution to the shared model'
 )
+assertEqual(
+  defaultById['apps'].kind,
+  'action',
+  'menu runs Apps as the app grid, not a submenu of rows'
+)
+assertEqual(
+  defaultById['apps'].action,
+  'omarchy-shell omarchy.menu apps',
+  'menu opens the app grid over the menu IPC target'
+)
+assertEqual(
+  defaultById['apps'].provider,
+  'apps',
+  'menu keeps app rows searchable from the Apps provider'
+)
+assert(
+  /AppGrid \{\s*\n\s*id: appGrid\s*\n\s*appLibrary: root\.appLibrary\s*\n\s*\}/.test(menuQml),
+  'menu hosts the app grid'
+)
+assert(
+  /function apps\(\): void \{ appGrid\.toggle\(\) \}/.test(menuQml),
+  'menu toggles the app grid from its IPC target'
+)
 const triggerItems = defaultItems.filter(item => item.parent === 'trigger')
 assertEqual(
   triggerItems[0].id,
