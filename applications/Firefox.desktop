@@ -6,5 +6,6 @@ Exec=/opt/firefox/firefox %u
 Icon=/opt/firefox/browser/chrome/icons/default/default128.png
 Terminal=false
 StartupNotify=true
+MimeType=x-scheme-handler/http;x-scheme-handler/https;text/html;
 Categories=Network;WebBrowser;
 Keywords=web;browser;internet;
