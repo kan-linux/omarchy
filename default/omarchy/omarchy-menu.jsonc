@@ -43,18 +43,10 @@
   "style.bar.position": {"icon":"","label":"Position"},
   "style.bar.transparency": {"icon":"󰂵","label":"Transparency","action":"omarchy-bar transparent toggle"},
   "style.hyprland": {"icon":"","label":"Hyprland","action":"omarchy-launch-config-editor \"$HOME/.config/hypr/looknfeel.lua\""},
-  "style.screensaver": {"icon":"󱄄","label":"Screensaver"},
-  "style.about": {"icon":"","label":"About"},
   "style.bar.position.top": {"icon":"󰁝","label":"Top","action":"omarchy-bar position top"},
   "style.bar.position.bottom": {"icon":"󰁅","label":"Bottom","action":"omarchy-bar position bottom"},
   "style.bar.position.left": {"icon":"󰁍","label":"Left","action":"omarchy-bar position left"},
   "style.bar.position.right": {"icon":"󰁔","label":"Right","action":"omarchy-bar position right"},
-  "style.about.text": {"icon":"","label":"Edit Text","action":"omarchy-branding-about text"},
-  "style.about.image": {"icon":"","label":"Set From Image","action":"omarchy-branding-about image"},
-  "style.about.default": {"icon":"","label":"Restore Default","action":"omarchy-branding-about reset"},
-  "style.screensaver.text": {"icon":"","label":"Edit Text","action":"omarchy-branding-screensaver text"},
-  "style.screensaver.image": {"icon":"","label":"Set From Image","action":"omarchy-branding-screensaver image"},
-  "style.screensaver.default": {"icon":"","label":"Restore Default","action":"omarchy-branding-screensaver reset"},
 
   // Setup
   "setup.monitors": {"icon":"󰍹","label":"Monitors","action":"omarchy-launch-config-editor \"$HOME/.config/hypr/monitors.lua\""},
