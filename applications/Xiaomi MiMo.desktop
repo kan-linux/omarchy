@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Xiaomi MiMo
+Exec=xdg-terminal-exec --app-id=TUI.tile -e mimo
+Terminal=false
+Type=Application
+Icon=xiaomi-mimo
+StartupNotify=true
+Keywords=mimo;mimocode;ai;xiaomi;
